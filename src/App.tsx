@@ -2,13 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
 import { motion } from 'framer-motion';
-import { User, LogOut, Clock, Heart, Phone, CheckCircle } from 'lucide-react';
-import { auth, phoneProvider } from './firebase';
-import { 
-  signInWithCredential,
-  PhoneAuthCredential,
-  RecaptchaVerifier
-} from 'firebase/auth';
+import { LogOut, Clock, Heart, Phone, CheckCircle } from 'lucide-react';
 
 interface ValidationError {
   field: string;
@@ -37,7 +31,6 @@ const App: React.FC = () => {
   const [phoneVerificationStep, setPhoneVerificationStep] = useState<'input' | 'code' | 'complete'>('input');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
-  const [verificationId, setVerificationId] = useState('');
   const [isPhoneVerifying, setIsPhoneVerifying] = useState(false);
 
   const questions = [
@@ -534,6 +527,15 @@ const App: React.FC = () => {
             >
               Your privacy is protected. We only use your Google account for authentication.
             </motion.p>
+            
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.8 }}
+              className="text-xs text-green-600 mt-2 font-medium"
+            >
+              ✨ Now live on blindl.com
+            </motion.div>
           </motion.div>
         </div>
       </GoogleOAuthProvider>
