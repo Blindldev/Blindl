@@ -474,12 +474,12 @@ const App: React.FC = () => {
   if (!isAuthenticated) {
     return (
       <GoogleOAuthProvider clientId="910532636592-98noic506pegni3jm6omq7p610u8gdrh.apps.googleusercontent.com">
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center safe-area-top safe-area-bottom">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="bg-white rounded-3xl shadow-2xl p-12 text-center max-w-md w-full mx-4"
+            className="mobile-card text-center max-w-md w-full mx-4"
           >
             <motion.div
               initial={{ scale: 0 }}
@@ -543,10 +543,10 @@ const App: React.FC = () => {
   // Waiting page (user has already submitted answers)
   if (user?.answers && Object.keys(user.answers).length > 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-8">
-        <div className="max-w-4xl mx-auto p-6">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-8 safe-area-top safe-area-bottom">
+        <div className="mobile-container">
           {/* Header */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
+          <div className="mobile-card mb-8">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 <img 
@@ -576,7 +576,7 @@ const App: React.FC = () => {
           </div>
 
           {/* Status Card */}
-          <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
+          <div className="mobile-card mb-8">
             <div className="flex items-center space-x-4 mb-6">
               <Clock className="w-8 h-8 text-blue-500" />
               <h2 className="text-2xl font-bold text-gray-800">Your Profile Status</h2>
@@ -599,7 +599,7 @@ const App: React.FC = () => {
           </div>
 
           {/* Your Answers */}
-          <div className="bg-white rounded-2xl shadow-xl p-8">
+          <div className="mobile-card">
             <h2 className="text-2xl font-bold text-gray-800 mb-6">Your Profile</h2>
             <div className="grid md:grid-cols-2 gap-6">
               {Object.entries(user.answers).map(([key, value]) => {
@@ -735,10 +735,10 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-8">
-      <div className="max-w-2xl mx-auto p-6">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-8 safe-area-top safe-area-bottom">
+      <div className="mobile-container">
         {/* Header */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
+        <div className="mobile-card mb-8">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-4">
               <img 
@@ -782,7 +782,7 @@ const App: React.FC = () => {
         </div>
 
         {/* Question Card */}
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+        <div className="mobile-card">
           <h2 className="text-2xl font-bold text-gray-800 mb-6">
             {currentQuestion.question}
           </h2>
@@ -827,4 +827,4 @@ const App: React.FC = () => {
   );
 };
 
-export default App; 
+export default App;

@@ -2,58 +2,80 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Mobile-specific improvements */
 @layer base {
-  html {
-    font-family: 'Inter', system-ui, sans-serif;
+  /* Prevent zoom on input focus on iOS */
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="number"],
+  textarea,
+  select {
+    font-size: 16px !important;
   }
   
+  /* Improve touch targets */
+  button, 
+  [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Smooth scrolling on iOS */
+  html {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+  
+  /* Prevent horizontal scroll */
   body {
-    @apply bg-gradient-to-br from-primary-50 to-secondary-50 min-h-screen;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* Safe area for iPhone X and newer */
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  /* Better tap highlights */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Improve text rendering */
+  * {
+    text-rendering: optimizeLegibility;
   }
 }
 
-@layer components {
-  .quiz-container {
-    @apply max-w-2xl mx-auto p-6;
+/* Custom scrollbar for webkit browsers */
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
   
-  .question-card {
-    @apply bg-white rounded-2xl shadow-xl p-8 border border-gray-100;
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
   
-  .progress-bar {
-    @apply w-full bg-gray-200 rounded-full h-2 overflow-hidden;
+  /* Mobile-first responsive utilities */
+  .mobile-container {
+    @apply px-4 py-6 max-w-md mx-auto;
   }
   
-  .progress-fill {
-    @apply h-full bg-gradient-to-r from-primary-500 to-secondary-500 transition-all duration-500 ease-out;
+  .mobile-card {
+    @apply bg-white rounded-2xl shadow-lg p-6 mx-4;
   }
   
-  .btn-primary {
-    @apply bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-medium py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
-  }
-  
-  .btn-secondary {
-    @apply bg-white border-2 border-gray-300 text-gray-700 font-medium py-3 px-6 rounded-xl transition-all duration-200 hover:border-primary-300 hover:text-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
-  }
-  
-  .input-field {
-    @apply w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200;
-  }
-  
-  .option-card {
-    @apply p-4 border-2 border-gray-200 rounded-xl cursor-pointer transition-all duration-200 hover:border-primary-300 hover:bg-primary-50;
-  }
-  
-  .option-card.selected {
-    @apply border-primary-500 bg-primary-50;
-  }
-  
-  .checkbox-option {
-    @apply flex items-center space-x-3 p-3 border border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-primary-300 hover:bg-primary-50;
-  }
-  
-  .checkbox-option.selected {
-    @apply border-primary-500 bg-primary-50;
+  /* Touch-friendly buttons */
+  .touch-button {
+    @apply min-h-[44px] min-w-[44px] flex items-center justify-center;
   }
 } 
