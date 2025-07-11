@@ -37,6 +37,356 @@ interface Match {
   };
 }
 
+// Move MatchPopup, RescheduleModal, and renderProfileEditInput above App
+
+// Match Popup Modal
+const MatchPopup: React.FC<{
+  match: Match | null;
+  isOpen: boolean;
+  showDetails: boolean;
+  onClose: () => void;
+  onResponse: (response: 'yes' | 'no' | 'reschedule') => void;
+  onToggleDetails: () => void;
+}> = ({ match, isOpen, showDetails, onClose, onResponse, onToggleDetails }) => {
+  console.log('MatchPopup render:', { match: !!match, isOpen, showDetails });
+  
+  if (!match) return null;
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 safe-area-top safe-area-bottom"
+          onClick={onClose}
+        >
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            className="bg-white rounded-2xl max-w-sm w-full max-h-[90vh] overflow-hidden shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button
+              onClick={onClose}
+              className="absolute top-4 right-4 z-10 bg-white rounded-full p-2 shadow-lg hover:bg-gray-50 transition-colors"
+            >
+              <X className="w-5 h-5 text-gray-600" />
+            </button>
+
+            {/* Flip Container */}
+            <motion.div
+              animate={{ rotateY: showDetails ? 180 : 0 }}
+              transition={{ duration: 0.6, type: "spring" }}
+              className="relative w-full h-full"
+              style={{ transformStyle: 'preserve-3d' }}
+            >
+              {/* Front Side - Match Info */}
+              <div className="w-full h-full overflow-y-auto" style={{ backfaceVisibility: 'hidden' }}>
+                <div className="relative">
+                  <img
+                    src={match.picture}
+                    alt={match.name}
+                    className="w-full h-64 object-cover"
+                  />
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+                    <h2 className="text-white text-xl font-bold">{match.name}, {match.age}</h2>
+                  </div>
+                </div>
+
+                <div className="p-6">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                    Potential Match Found!
+                  </h3>
+                  <p className="text-gray-600 mb-6">
+                    Are you free for <span className="font-semibold">{match.dateOption}</span> on{' '}
+                    <span className="font-semibold">{match.dayOption}</span> at{' '}
+                    <span className="font-semibold">{match.timeOption}</span>?
+                  </p>
+
+                  {/* Action Buttons */}
+                  <div className="flex space-x-3 mb-6">
+                    <button
+                      onClick={() => onResponse('yes')}
+                      className="flex-1 bg-green-500 text-white py-3 rounded-xl font-semibold hover:bg-green-600 transition-colors"
+                    >
+                      Yes
+                    </button>
+                    <button
+                      onClick={() => onResponse('no')}
+                      className="flex-1 bg-red-500 text-white py-3 rounded-xl font-semibold hover:bg-red-600 transition-colors"
+                    >
+                      No
+                    </button>
+                    <button
+                      onClick={() => onResponse('reschedule')}
+                      className="flex-1 bg-yellow-500 text-white py-3 rounded-xl font-semibold hover:bg-yellow-600 transition-colors"
+                    >
+                      Reschedule
+                    </button>
+                  </div>
+
+                  {/* More Info Button */}
+                  <button
+                    onClick={onToggleDetails}
+                    className="w-full flex items-center justify-center space-x-2 text-blue-600 hover:text-blue-700 font-medium"
+                  >
+                    <span>More Info</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Back Side - Venue Details */}
+              <div 
+                className="absolute inset-0 w-full h-full bg-white overflow-y-auto" 
+                style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
+              >
+                <div className="relative">
+                  <img
+                    src={match.venue.image}
+                    alt={match.venue.name}
+                    className="w-full h-48 object-cover"
+                  />
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+                    <h2 className="text-white text-xl font-bold">{match.venue.name}</h2>
+                  </div>
+                </div>
+
+                <div className="p-6">
+                  <div className="flex items-center space-x-2 mb-4">
+                    <MapPin className="w-5 h-5 text-gray-500" />
+                    <span className="text-gray-600">{match.venue.address}</span>
+                  </div>
+
+                  <div className="flex items-center space-x-2 mb-4">
+                    <Calendar className="w-5 h-5 text-gray-500" />
+                    <span className="text-gray-600">{match.dayOption} at {match.timeOption}</span>
+                  </div>
+
+                  <div className="flex items-center space-x-2 mb-6">
+                    <ClockIcon className="w-5 h-5 text-gray-500" />
+                    <span className="text-gray-600">{match.dateOption}</span>
+                  </div>
+
+                  <p className="text-gray-700 mb-6 leading-relaxed">
+                    {match.venue.description}
+                  </p>
+
+                  <div className="bg-gray-50 rounded-xl p-4 mb-6">
+                    <h4 className="font-semibold text-gray-800 mb-2">About {match.name}</h4>
+                    <p className="text-gray-600 text-sm leading-relaxed">
+                      {match.bio}
+                    </p>
+                  </div>
+
+                  {/* Action Buttons on Back Side */}
+                  <div className="flex space-x-3 mb-6">
+                    <button
+                      onClick={() => onResponse('yes')}
+                      className="flex-1 bg-green-500 text-white py-3 rounded-xl font-semibold hover:bg-green-600 transition-colors"
+                    >
+                      Yes
+                    </button>
+                    <button
+                      onClick={() => onResponse('no')}
+                      className="flex-1 bg-red-500 text-white py-3 rounded-xl font-semibold hover:bg-red-600 transition-colors"
+                    >
+                      No
+                    </button>
+                    <button
+                      onClick={() => onResponse('reschedule')}
+                      className="flex-1 bg-yellow-500 text-white py-3 rounded-xl font-semibold hover:bg-yellow-600 transition-colors"
+                    >
+                      Reschedule
+                    </button>
+                  </div>
+
+                  {/* Back Button */}
+                  <button
+                    onClick={onToggleDetails}
+                    className="w-full flex items-center justify-center space-x-2 text-blue-600 hover:text-blue-700 font-medium"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    <span>Back to Match</span>
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
+// Reschedule Modal
+const RescheduleModal: React.FC<{
+  isOpen: boolean;
+  match: Match | null;
+  selectedDate: Date | null;
+  selectedTime: string;
+  timeOptions: string[];
+  onClose: () => void;
+  onSubmit: () => void;
+  onDateSelect: (date: Date) => void;
+  onTimeSelect: (time: string) => void;
+  getAvailableDates: () => Date[];
+}> = ({ isOpen, match, selectedDate, selectedTime, timeOptions, onClose, onSubmit, onDateSelect, onTimeSelect, getAvailableDates }) => {
+  if (!match) return null;
+
+  const availableDates = getAvailableDates();
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 safe-area-top safe-area-bottom"
+          onClick={onClose}
+        >
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] h-[90vh] overflow-hidden shadow-2xl flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button
+              onClick={onClose}
+              className="absolute top-4 right-4 z-10 bg-white rounded-full p-2 shadow-lg hover:bg-gray-50 transition-colors"
+            >
+              <X className="w-5 h-5 text-gray-600" />
+            </button>
+
+            {/* Scrollable Content */}
+            <div className="p-6 flex-1 min-h-0 overflow-y-auto">
+              <h2 className="text-xl font-bold text-gray-800 mb-4">Reschedule Date</h2>
+              <div className="mb-6">
+                <label className="block text-gray-700 font-medium mb-2">Select a new date:</label>
+                <div className="grid grid-cols-2 gap-3">
+                  {availableDates.map((date) => (
+                    <button
+                      key={date.toISOString()}
+                      onClick={() => onDateSelect(date)}
+                      className={`py-2 px-3 rounded-xl font-medium border transition-colors ${
+                        selectedDate && date.toDateString() === selectedDate.toDateString()
+                          ? 'bg-blue-500 text-white border-blue-500'
+                          : 'bg-white text-gray-700 border-gray-200 hover:bg-blue-50'
+                      }`}
+                    >
+                      {date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="mb-6">
+                <label className="block text-gray-700 font-medium mb-2">Select a new time:</label>
+                <div className="grid grid-cols-3 gap-3">
+                  {timeOptions.map((time) => (
+                    <button
+                      key={time}
+                      onClick={() => onTimeSelect(time)}
+                      className={`py-2 px-3 rounded-xl font-medium border transition-colors ${
+                        selectedTime === time
+                          ? 'bg-blue-500 text-white border-blue-500'
+                          : 'bg-white text-gray-700 border-gray-200 hover:bg-blue-50'
+                      }`}
+                    >
+                      {time}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+            {/* Footer */}
+            <div className="p-6 border-t bg-gray-50 flex justify-end">
+              <button
+                onClick={onClose}
+                className="px-6 py-3 rounded-xl font-medium bg-gray-200 text-gray-700 hover:bg-gray-300 mr-3"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={onSubmit}
+                disabled={!selectedDate || !selectedTime}
+                className={`px-6 py-3 rounded-xl font-medium transition-colors ${
+                  !selectedDate || !selectedTime
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'bg-blue-500 text-white hover:bg-blue-600'
+                }`}
+              >
+                Confirm
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
+function renderProfileEditInput(question: any, editingValue: any, setEditingValue: (v: any) => void) {
+  if (question.type === 'multiSelect') {
+    return (
+      <div className="space-y-2">
+        {question.options?.map((option: string) => (
+          <div
+            key={option}
+            className={`p-2 border rounded cursor-pointer ${Array.isArray(editingValue) && editingValue.includes(option) ? 'bg-blue-100 border-blue-400' : 'bg-white border-gray-200'}`}
+            onClick={() => {
+              let newVal = Array.isArray(editingValue) ? [...editingValue] : [];
+              if (newVal.includes(option)) newVal = newVal.filter((o: string) => o !== option);
+              else newVal.push(option);
+              setEditingValue(newVal);
+            }}
+          >
+            <span>{option}</span>
+            {Array.isArray(editingValue) && editingValue.includes(option) && <span className="ml-2 text-blue-600">✓</span>}
+          </div>
+        ))}
+      </div>
+    );
+  } else if (question.type === 'select') {
+    return (
+      <select
+        className="w-full border rounded p-2"
+        value={editingValue}
+        onChange={e => setEditingValue(e.target.value)}
+      >
+        <option value="">Select...</option>
+        {question.options?.map((option: string) => (
+          <option key={option} value={option}>{option}</option>
+        ))}
+      </select>
+    );
+  } else if (question.type === 'textarea') {
+    return (
+      <textarea
+        className="w-full border rounded p-2"
+        value={editingValue}
+        onChange={e => setEditingValue(e.target.value)}
+        rows={3}
+      />
+    );
+  } else {
+    return (
+      <input
+        className="w-full border rounded p-2"
+        type={question.type}
+        value={editingValue}
+        onChange={e => setEditingValue(e.target.value)}
+      />
+    );
+  }
+}
+
 const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<UserProfile | null>(null);
@@ -1568,396 +1918,5 @@ const App: React.FC = () => {
     </div>
   );
 };
-
-// Match Popup Modal
-const MatchPopup: React.FC<{
-  match: Match | null;
-  isOpen: boolean;
-  showDetails: boolean;
-  onClose: () => void;
-  onResponse: (response: 'yes' | 'no' | 'reschedule') => void;
-  onToggleDetails: () => void;
-}> = ({ match, isOpen, showDetails, onClose, onResponse, onToggleDetails }) => {
-  console.log('MatchPopup render:', { match: !!match, isOpen, showDetails });
-  
-  if (!match) return null;
-
-  return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 safe-area-top safe-area-bottom"
-          onClick={onClose}
-        >
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.8, opacity: 0 }}
-            className="bg-white rounded-2xl max-w-sm w-full max-h-[90vh] overflow-hidden shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Close Button */}
-            <button
-              onClick={onClose}
-              className="absolute top-4 right-4 z-10 bg-white rounded-full p-2 shadow-lg hover:bg-gray-50 transition-colors"
-            >
-              <X className="w-5 h-5 text-gray-600" />
-            </button>
-
-            {/* Flip Container */}
-            <motion.div
-              animate={{ rotateY: showDetails ? 180 : 0 }}
-              transition={{ duration: 0.6, type: "spring" }}
-              className="relative w-full h-full"
-              style={{ transformStyle: 'preserve-3d' }}
-            >
-              {/* Front Side - Match Info */}
-              <div className="w-full h-full overflow-y-auto" style={{ backfaceVisibility: 'hidden' }}>
-                <div className="relative">
-                  <img
-                    src={match.picture}
-                    alt={match.name}
-                    className="w-full h-64 object-cover"
-                  />
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-                    <h2 className="text-white text-xl font-bold">{match.name}, {match.age}</h2>
-                  </div>
-                </div>
-
-                <div className="p-6">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                    Potential Match Found!
-                  </h3>
-                  <p className="text-gray-600 mb-6">
-                    Are you free for <span className="font-semibold">{match.dateOption}</span> on{' '}
-                    <span className="font-semibold">{match.dayOption}</span> at{' '}
-                    <span className="font-semibold">{match.timeOption}</span>?
-                  </p>
-
-                  {/* Action Buttons */}
-                  <div className="flex space-x-3 mb-6">
-                    <button
-                      onClick={() => onResponse('yes')}
-                      className="flex-1 bg-green-500 text-white py-3 rounded-xl font-semibold hover:bg-green-600 transition-colors"
-                    >
-                      Yes
-                    </button>
-                    <button
-                      onClick={() => onResponse('no')}
-                      className="flex-1 bg-red-500 text-white py-3 rounded-xl font-semibold hover:bg-red-600 transition-colors"
-                    >
-                      No
-                    </button>
-                    <button
-                      onClick={() => onResponse('reschedule')}
-                      className="flex-1 bg-yellow-500 text-white py-3 rounded-xl font-semibold hover:bg-yellow-600 transition-colors"
-                    >
-                      Reschedule
-                    </button>
-                  </div>
-
-                  {/* More Info Button */}
-                  <button
-                    onClick={onToggleDetails}
-                    className="w-full flex items-center justify-center space-x-2 text-blue-600 hover:text-blue-700 font-medium"
-                  >
-                    <span>More Info</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Back Side - Venue Details */}
-              <div 
-                className="absolute inset-0 w-full h-full bg-white overflow-y-auto" 
-                style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
-              >
-                <div className="relative">
-                  <img
-                    src={match.venue.image}
-                    alt={match.venue.name}
-                    className="w-full h-48 object-cover"
-                  />
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-                    <h2 className="text-white text-xl font-bold">{match.venue.name}</h2>
-                  </div>
-                </div>
-
-                <div className="p-6">
-                  <div className="flex items-center space-x-2 mb-4">
-                    <MapPin className="w-5 h-5 text-gray-500" />
-                    <span className="text-gray-600">{match.venue.address}</span>
-                  </div>
-
-                  <div className="flex items-center space-x-2 mb-4">
-                    <Calendar className="w-5 h-5 text-gray-500" />
-                    <span className="text-gray-600">{match.dayOption} at {match.timeOption}</span>
-                  </div>
-
-                  <div className="flex items-center space-x-2 mb-6">
-                    <ClockIcon className="w-5 h-5 text-gray-500" />
-                    <span className="text-gray-600">{match.dateOption}</span>
-                  </div>
-
-                  <p className="text-gray-700 mb-6 leading-relaxed">
-                    {match.venue.description}
-                  </p>
-
-                  <div className="bg-gray-50 rounded-xl p-4 mb-6">
-                    <h4 className="font-semibold text-gray-800 mb-2">About {match.name}</h4>
-                    <p className="text-gray-600 text-sm leading-relaxed">
-                      {match.bio}
-                    </p>
-                  </div>
-
-                  {/* Action Buttons on Back Side */}
-                  <div className="flex space-x-3 mb-6">
-                    <button
-                      onClick={() => onResponse('yes')}
-                      className="flex-1 bg-green-500 text-white py-3 rounded-xl font-semibold hover:bg-green-600 transition-colors"
-                    >
-                      Yes
-                    </button>
-                    <button
-                      onClick={() => onResponse('no')}
-                      className="flex-1 bg-red-500 text-white py-3 rounded-xl font-semibold hover:bg-red-600 transition-colors"
-                    >
-                      No
-                    </button>
-                    <button
-                      onClick={() => onResponse('reschedule')}
-                      className="flex-1 bg-yellow-500 text-white py-3 rounded-xl font-semibold hover:bg-yellow-600 transition-colors"
-                    >
-                      Reschedule
-                    </button>
-                  </div>
-
-                  {/* Back Button */}
-                  <button
-                    onClick={onToggleDetails}
-                    className="w-full flex items-center justify-center space-x-2 text-blue-600 hover:text-blue-700 font-medium"
-                  >
-                    <ArrowLeft className="w-4 h-4" />
-                    <span>Back to Match</span>
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-};
-
-// Reschedule Modal
-const RescheduleModal: React.FC<{
-  isOpen: boolean;
-  match: Match | null;
-  selectedDate: Date | null;
-  selectedTime: string;
-  timeOptions: string[];
-  onClose: () => void;
-  onSubmit: () => void;
-  onDateSelect: (date: Date) => void;
-  onTimeSelect: (time: string) => void;
-  getAvailableDates: () => Date[];
-}> = ({ isOpen, match, selectedDate, selectedTime, timeOptions, onClose, onSubmit, onDateSelect, onTimeSelect, getAvailableDates }) => {
-  if (!match) return null;
-
-  const availableDates = getAvailableDates();
-
-  return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 safe-area-top safe-area-bottom"
-          onClick={onClose}
-        >
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.8, opacity: 0 }}
-            className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] h-[90vh] overflow-hidden shadow-2xl flex flex-col"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Close Button */}
-            <button
-              onClick={onClose}
-              className="absolute top-4 right-4 z-10 bg-white rounded-full p-2 shadow-lg hover:bg-gray-50 transition-colors"
-            >
-              <X className="w-5 h-5 text-gray-600" />
-            </button>
-
-            {/* Scrollable Content */}
-            <div className="p-6 flex-1 min-h-0 overflow-y-auto">
-              <div className="text-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-800 mb-2">Reschedule Date</h2>
-                <p className="text-gray-600">
-                  Select a new date and time for your date with {match.name}
-                </p>
-              </div>
-
-              {/* Original Date Info */}
-              <div className="bg-blue-50 rounded-xl p-4 mb-6">
-                <h3 className="font-semibold text-blue-800 mb-2">Original Date</h3>
-                <p className="text-blue-700">
-                  {match.dayOption} at {match.timeOption} - {match.dateOption}
-                </p>
-              </div>
-
-              {/* Date Selection */}
-              <div className="mb-6">
-                <h3 className="font-semibold text-gray-800 mb-3">Select New Date</h3>
-                <div className="grid grid-cols-7 gap-2 max-h-48 overflow-y-auto">
-                  {availableDates.map((date) => {
-                    const isSelected = selectedDate && 
-                      date.toDateString() === selectedDate.toDateString();
-                    const isToday = date.toDateString() === new Date().toDateString();
-                    
-                    return (
-                      <button
-                        key={date.toISOString()}
-                        onClick={() => onDateSelect(date)}
-                        className={`p-2 rounded-lg text-sm font-medium transition-colors ${
-                          isSelected
-                            ? 'bg-blue-500 text-white'
-                            : isToday
-                            ? 'bg-gray-200 text-gray-800'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
-                      >
-                        <div className="text-xs">{date.toLocaleDateString('en-US', { weekday: 'short' })}</div>
-                        <div>{date.getDate()}</div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Time Selection */}
-              <div className="mb-6">
-                <h3 className="font-semibold text-gray-800 mb-3">Select New Time</h3>
-                <div className="grid grid-cols-3 gap-2 max-h-32 overflow-y-auto">
-                  {timeOptions.map((time) => (
-                    <button
-                      key={time}
-                      onClick={() => onTimeSelect(time)}
-                      className={`p-2 rounded-lg text-sm font-medium transition-colors ${
-                        selectedTime === time
-                          ? 'bg-blue-500 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                    >
-                      {time}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Selected Date & Time Display */}
-              {selectedDate && selectedTime && (
-                <div className="bg-green-50 rounded-xl p-4 mb-6">
-                  <h3 className="font-semibold text-green-800 mb-2">New Date Selected</h3>
-                  <p className="text-green-700">
-                    {selectedDate.toLocaleDateString('en-US', { 
-                      weekday: 'long', 
-                      year: 'numeric', 
-                      month: 'long', 
-                      day: 'numeric' 
-                    })} at {selectedTime}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* Sticky Action Buttons */}
-            <div className="flex space-x-3 p-6 border-t bg-white">
-              <button
-                onClick={onClose}
-                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={onSubmit}
-                disabled={!selectedDate || !selectedTime}
-                className={`flex-1 px-4 py-3 rounded-xl font-medium transition-colors ${
-                  selectedDate && selectedTime
-                    ? 'bg-blue-500 text-white hover:bg-blue-600'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
-              >
-                Send Request
-              </button>
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-};
-
-// Helper to render the correct input for editing a profile answer
-function renderProfileEditInput(question: any, editingValue: any, setEditingValue: (v: any) => void) {
-  if (question.type === 'multiSelect') {
-    return (
-      <div className="space-y-2">
-        {question.options?.map((option: string) => (
-          <div
-            key={option}
-            className={`p-2 border rounded cursor-pointer ${Array.isArray(editingValue) && editingValue.includes(option) ? 'bg-blue-100 border-blue-400' : 'bg-white border-gray-200'}`}
-            onClick={() => {
-              let newVal = Array.isArray(editingValue) ? [...editingValue] : [];
-              if (newVal.includes(option)) newVal = newVal.filter((o: string) => o !== option);
-              else newVal.push(option);
-              setEditingValue(newVal);
-            }}
-          >
-            <span>{option}</span>
-            {Array.isArray(editingValue) && editingValue.includes(option) && <span className="ml-2 text-blue-600">✓</span>}
-          </div>
-        ))}
-      </div>
-    );
-  } else if (question.type === 'select') {
-    return (
-      <select
-        className="w-full border rounded p-2"
-        value={editingValue}
-        onChange={e => setEditingValue(e.target.value)}
-      >
-        <option value="">Select...</option>
-        {question.options?.map((option: string) => (
-          <option key={option} value={option}>{option}</option>
-        ))}
-      </select>
-    );
-  } else if (question.type === 'textarea') {
-    return (
-      <textarea
-        className="w-full border rounded p-2"
-        value={editingValue}
-        onChange={e => setEditingValue(e.target.value)}
-        rows={3}
-      />
-    );
-  } else {
-    return (
-      <input
-        className="w-full border rounded p-2"
-        type={question.type}
-        value={editingValue}
-        onChange={e => setEditingValue(e.target.value)}
-      />
-    );
-  }
-}
 
 export default App;
