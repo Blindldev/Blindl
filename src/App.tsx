@@ -1188,13 +1188,89 @@ const App: React.FC = () => {
               {Object.entries(user.answers).map(([key, value]) => {
                 const question = questions.find(q => q.id === key);
                 if (!question) return null;
-                
+                const isEditing = editingField === key;
                 return (
-                  <div key={key} className="border border-gray-200 rounded-xl p-4">
-                    <h3 className="font-semibold text-gray-800 mb-2">{question.question}</h3>
-                    <p className="text-gray-600">
-                      {Array.isArray(value) ? value.join(', ') : value}
-                    </p>
+                  <div key={key} className="border border-gray-200 rounded-xl p-4 flex items-center justify-between mb-2">
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-800 mb-2">{question.question}</h3>
+                      {isEditing ? (
+                        question.type === 'multiSelect' ? (
+                          <div className="space-y-2">
+                            {question.options?.map((option: string) => (
+                              <div
+                                key={option}
+                                className={`p-2 border rounded cursor-pointer ${Array.isArray(editingValue) && editingValue.includes(option) ? 'bg-blue-100 border-blue-400' : 'bg-white border-gray-200'}`}
+                                onClick={() => {
+                                  let newVal = Array.isArray(editingValue) ? [...editingValue] : [];
+                                  if (newVal.includes(option)) newVal = newVal.filter((o: string) => o !== option);
+                                  else newVal.push(option);
+                                  setEditingValue(newVal);
+                                }}
+                              >
+                                <span>{option}</span>
+                                {Array.isArray(editingValue) && editingValue.includes(option) && <span className="ml-2 text-blue-600">✓</span>}
+                              </div>
+                            ))}
+                          </div>
+                        ) : question.type === 'select' ? (
+                          <select
+                            className="w-full border rounded p-2"
+                            value={editingValue}
+                            onChange={e => setEditingValue(e.target.value)}
+                          >
+                            <option value="">Select...</option>
+                            {question.options?.map((option: string) => (
+                              <option key={option} value={option}>{option}</option>
+                            ))}
+                          </select>
+                        ) : question.type === 'textarea' ? (
+                          <textarea
+                            className="w-full border rounded p-2"
+                            value={editingValue}
+                            onChange={e => setEditingValue(e.target.value)}
+                            rows={3}
+                          />
+                        ) : (
+                          <input
+                            className="w-full border rounded p-2"
+                            type={question.type}
+                            value={editingValue}
+                            onChange={e => setEditingValue(e.target.value)}
+                          />
+                        )
+                      ) : (
+                        <p className="text-gray-600">{Array.isArray(value) ? value.join(', ') : value}</p>
+                      )}
+                    </div>
+                    <div className="ml-4 flex flex-col items-end">
+                      {isEditing ? (
+                        <>
+                          <button
+                            className="text-green-600 font-semibold mb-1"
+                            onClick={() => {
+                              // Save logic
+                              const newAnswers = { ...user.answers, [key]: editingValue };
+                              setUser({ ...user, answers: newAnswers });
+                              localStorage.setItem(`user_${user.email}`, JSON.stringify({ ...user, answers: newAnswers }));
+                              setEditingField(null);
+                              setEditingValue(null);
+                            }}
+                          >Save</button>
+                          <button
+                            className="text-gray-500 text-xs"
+                            onClick={() => { setEditingField(null); setEditingValue(null); }}
+                          >Cancel</button>
+                        </>
+                      ) : (
+                        <button
+                          className="text-blue-500 hover:text-blue-700"
+                          onClick={() => { setEditingField(key); setEditingValue(value); }}
+                          aria-label={`Edit ${question.question}`}
+                        >
+                          ✎
+                        </button>
+                      )}
+                    </div>
                   </div>
                 );
               })}
@@ -1355,6 +1431,8 @@ const App: React.FC = () => {
   };
 
   const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [editingField, setEditingField] = useState<string | null>(null);
+  const [editingValue, setEditingValue] = useState<any>(null);
 
   if (isEditingProfile) {
     return (
