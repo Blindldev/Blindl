@@ -1217,7 +1217,7 @@ const App: React.FC = () => {
   }
 
   // Welcome page (not authenticated)
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !user) {
     return (
       <GoogleOAuthProvider clientId="910532636592-98noic506pegni3jm6omq7p610u8gdrh.apps.googleusercontent.com">
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center safe-area-top safe-area-bottom">
@@ -1235,7 +1235,6 @@ const App: React.FC = () => {
             >
               <Heart className="w-16 h-16 text-blue-500 mx-auto" />
             </motion.div>
-            
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -1244,7 +1243,6 @@ const App: React.FC = () => {
             >
               Find Your Perfect Match
             </motion.h1>
-            
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -1254,7 +1252,6 @@ const App: React.FC = () => {
               Take our compatibility quiz to discover meaningful connections. 
               Sign in with Google to get started.
             </motion.p>
-            
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -1271,7 +1268,6 @@ const App: React.FC = () => {
                 shape="rectangular"
               />
             </motion.div>
-            
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -1280,7 +1276,6 @@ const App: React.FC = () => {
             >
               Your privacy is protected. We only use your Google account for authentication.
             </motion.p>
-            
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
