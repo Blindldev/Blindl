@@ -54,6 +54,9 @@ const App: React.FC = () => {
   const [showMatchDetails, setShowMatchDetails] = useState(false);
   const [currentMatch, setCurrentMatch] = useState<Match | null>(null);
   const [matchIndex, setMatchIndex] = useState(0);
+  const [showRescheduleModal, setShowRescheduleModal] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedTime, setSelectedTime] = useState<string>('');
 
   // Dummy matches with different women's images
   const dummyMatches: Match[] = [
@@ -137,6 +140,16 @@ const App: React.FC = () => {
         image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=300&fit=crop'
       }
     }
+  ];
+
+  // Time options for rescheduling
+  const timeOptions = [
+    '10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM',
+    '12:00 PM', '12:30 PM', '1:00 PM', '1:30 PM',
+    '2:00 PM', '2:30 PM', '3:00 PM', '3:30 PM',
+    '4:00 PM', '4:30 PM', '5:00 PM', '5:30 PM',
+    '6:00 PM', '6:30 PM', '7:00 PM', '7:30 PM',
+    '8:00 PM', '8:30 PM', '9:00 PM', '9:30 PM'
   ];
 
   const questions = [
@@ -348,6 +361,12 @@ const App: React.FC = () => {
   const handleMatchResponse = (response: 'yes' | 'no' | 'reschedule') => {
     // Handle the match response
     console.log('Match response:', response);
+    
+    if (response === 'reschedule') {
+      setShowRescheduleModal(true);
+      return;
+    }
+    
     setShowMatchPopup(false);
     setCurrentMatch(null);
     setShowMatchDetails(false);
@@ -355,6 +374,46 @@ const App: React.FC = () => {
 
   const handleToggleMatchDetails = () => {
     setShowMatchDetails(!showMatchDetails);
+  };
+
+  const handleRescheduleSubmit = () => {
+    if (!selectedDate || !selectedTime) {
+      alert('Please select both a date and time.');
+      return;
+    }
+    
+    console.log('Reschedule request:', {
+      originalMatch: currentMatch,
+      newDate: selectedDate,
+      newTime: selectedTime
+    });
+    
+    // Here you would typically send this to your backend
+    alert(`Reschedule request sent! New date: ${selectedDate.toLocaleDateString()} at ${selectedTime}`);
+    
+    // Close modals and reset
+    setShowRescheduleModal(false);
+    setShowMatchPopup(false);
+    setCurrentMatch(null);
+    setShowMatchDetails(false);
+    setSelectedDate(null);
+    setSelectedTime('');
+  };
+
+  const handleDateSelect = (date: Date) => {
+    setSelectedDate(date);
+  };
+
+  const getAvailableDates = () => {
+    const dates: Date[] = [];
+    const today = new Date();
+    const twoWeeksFromNow = new Date(today.getTime() + (14 * 24 * 60 * 60 * 1000));
+    
+    for (let d = new Date(today); d <= twoWeeksFromNow; d.setDate(d.getDate() + 1)) {
+      dates.push(new Date(d));
+    }
+    
+    return dates;
   };
 
   const handlePhoneVerification = async () => {
@@ -778,6 +837,20 @@ const App: React.FC = () => {
           onResponse={handleMatchResponse}
           onToggleDetails={handleToggleMatchDetails}
         />
+
+        {/* Reschedule Modal */}
+        <RescheduleModal
+          isOpen={showRescheduleModal}
+          match={currentMatch}
+          selectedDate={selectedDate}
+          selectedTime={selectedTime}
+          timeOptions={timeOptions}
+          onClose={() => setShowRescheduleModal(false)}
+          onSubmit={handleRescheduleSubmit}
+          onDateSelect={handleDateSelect}
+          onTimeSelect={setSelectedTime}
+          getAvailableDates={getAvailableDates}
+        />
       </div>
     );
   }
@@ -993,6 +1066,20 @@ const App: React.FC = () => {
         onResponse={handleMatchResponse}
         onToggleDetails={handleToggleMatchDetails}
       />
+
+      {/* Reschedule Modal */}
+      <RescheduleModal
+        isOpen={showRescheduleModal}
+        match={currentMatch}
+        selectedDate={selectedDate}
+        selectedTime={selectedTime}
+        timeOptions={timeOptions}
+        onClose={() => setShowRescheduleModal(false)}
+        onSubmit={handleRescheduleSubmit}
+        onDateSelect={handleDateSelect}
+        onTimeSelect={setSelectedTime}
+        getAvailableDates={getAvailableDates}
+      />
     </div>
   );
 };
@@ -1174,6 +1261,156 @@ const MatchPopup: React.FC<{
                 </div>
               </div>
             </motion.div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
+// Reschedule Modal
+const RescheduleModal: React.FC<{
+  isOpen: boolean;
+  match: Match | null;
+  selectedDate: Date | null;
+  selectedTime: string;
+  timeOptions: string[];
+  onClose: () => void;
+  onSubmit: () => void;
+  onDateSelect: (date: Date) => void;
+  onTimeSelect: (time: string) => void;
+  getAvailableDates: () => Date[];
+}> = ({ isOpen, match, selectedDate, selectedTime, timeOptions, onClose, onSubmit, onDateSelect, onTimeSelect, getAvailableDates }) => {
+  if (!match) return null;
+
+  const availableDates = getAvailableDates();
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 safe-area-top safe-area-bottom"
+          onClick={onClose}
+        >
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-hidden shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button
+              onClick={onClose}
+              className="absolute top-4 right-4 z-10 bg-white rounded-full p-2 shadow-lg hover:bg-gray-50 transition-colors"
+            >
+              <X className="w-5 h-5 text-gray-600" />
+            </button>
+
+            <div className="p-6">
+              <div className="text-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">Reschedule Date</h2>
+                <p className="text-gray-600">
+                  Select a new date and time for your date with {match.name}
+                </p>
+              </div>
+
+              {/* Original Date Info */}
+              <div className="bg-blue-50 rounded-xl p-4 mb-6">
+                <h3 className="font-semibold text-blue-800 mb-2">Original Date</h3>
+                <p className="text-blue-700">
+                  {match.dayOption} at {match.timeOption} - {match.dateOption}
+                </p>
+              </div>
+
+              {/* Date Selection */}
+              <div className="mb-6">
+                <h3 className="font-semibold text-gray-800 mb-3">Select New Date</h3>
+                <div className="grid grid-cols-7 gap-2 max-h-48 overflow-y-auto">
+                  {availableDates.map((date) => {
+                    const isSelected = selectedDate && 
+                      date.toDateString() === selectedDate.toDateString();
+                    const isToday = date.toDateString() === new Date().toDateString();
+                    
+                    return (
+                      <button
+                        key={date.toISOString()}
+                        onClick={() => onDateSelect(date)}
+                        className={`p-2 rounded-lg text-sm font-medium transition-colors ${
+                          isSelected
+                            ? 'bg-blue-500 text-white'
+                            : isToday
+                            ? 'bg-gray-200 text-gray-800'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        <div className="text-xs">{date.toLocaleDateString('en-US', { weekday: 'short' })}</div>
+                        <div>{date.getDate()}</div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Time Selection */}
+              <div className="mb-6">
+                <h3 className="font-semibold text-gray-800 mb-3">Select New Time</h3>
+                <div className="grid grid-cols-3 gap-2 max-h-32 overflow-y-auto">
+                  {timeOptions.map((time) => (
+                    <button
+                      key={time}
+                      onClick={() => onTimeSelect(time)}
+                      className={`p-2 rounded-lg text-sm font-medium transition-colors ${
+                        selectedTime === time
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      {time}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Selected Date & Time Display */}
+              {selectedDate && selectedTime && (
+                <div className="bg-green-50 rounded-xl p-4 mb-6">
+                  <h3 className="font-semibold text-green-800 mb-2">New Date Selected</h3>
+                  <p className="text-green-700">
+                    {selectedDate.toLocaleDateString('en-US', { 
+                      weekday: 'long', 
+                      year: 'numeric', 
+                      month: 'long', 
+                      day: 'numeric' 
+                    })} at {selectedTime}
+                  </p>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex space-x-3">
+                <button
+                  onClick={onClose}
+                  className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={onSubmit}
+                  disabled={!selectedDate || !selectedTime}
+                  className={`flex-1 px-4 py-3 rounded-xl font-medium transition-colors ${
+                    selectedDate && selectedTime
+                      ? 'bg-blue-500 text-white hover:bg-blue-600'
+                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  }`}
+                >
+                  Send Request
+                </button>
+              </div>
+            </div>
           </motion.div>
         </motion.div>
       )}
