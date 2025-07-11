@@ -508,6 +508,13 @@ const App: React.FC = () => {
       }
     },
     {
+      id: 'budget',
+      question: 'What is your typical date budget?',
+      type: 'select',
+      options: ['Free', '$', '$$', '$$$', '$$$$'],
+      required: true
+    },
+    {
       id: 'description',
       question: 'Tell us about yourself',
       type: 'textarea',
@@ -841,6 +848,15 @@ const App: React.FC = () => {
       delete newErrors[questionId];
       return newErrors;
     });
+
+    // Auto-advance for single select questions in Lala Mode
+    const currentLalaQuestion = allLalaQuestions[lalaCurrentStep];
+    if (currentLalaQuestion && currentLalaQuestion.id === questionId && currentLalaQuestion.type === 'select' && answer) {
+      // Small delay to allow the UI to update
+      setTimeout(() => {
+        handleLalaNext();
+      }, 300);
+    }
   };
 
   const handleLalaNext = () => {
@@ -971,6 +987,15 @@ const App: React.FC = () => {
       delete newErrors[questionId];
       return newErrors;
     });
+
+    // Auto-advance for single select questions (not multi-select, text, textarea, etc.)
+    const currentQuestion = questions[currentStep];
+    if (currentQuestion && currentQuestion.id === questionId && currentQuestion.type === 'select' && answer) {
+      // Small delay to allow the UI to update
+      setTimeout(() => {
+        handleNext();
+      }, 300);
+    }
   };
 
   const handleNext = async () => {
