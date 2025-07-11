@@ -562,10 +562,93 @@ const App: React.FC = () => {
     }
   ];
 
+  // Lollapalooza 2025 Schedule
+  const lollapaloozaSchedule = {
+    thursday: [
+      { time: '12:00 PM', artist: 'The Beaches', stage: 'T-Mobile' },
+      { time: '1:00 PM', artist: 'The Last Dinner Party', stage: 'T-Mobile' },
+      { time: '2:00 PM', artist: 'Renée Rapp', stage: 'T-Mobile' },
+      { time: '3:00 PM', artist: 'Tyler, The Creator', stage: 'T-Mobile' },
+      { time: '4:00 PM', artist: 'SZA', stage: 'T-Mobile' },
+      { time: '5:00 PM', artist: 'Blink-182', stage: 'T-Mobile' },
+      { time: '6:00 PM', artist: 'The Killers', stage: 'T-Mobile' },
+      { time: '7:00 PM', artist: 'Future', stage: 'T-Mobile' },
+      { time: '8:00 PM', artist: 'Kendrick Lamar', stage: 'T-Mobile' },
+      { time: '9:00 PM', artist: 'Lana Del Rey', stage: 'T-Mobile' }
+    ],
+    friday: [
+      { time: '12:00 PM', artist: 'The Marías', stage: 'T-Mobile' },
+      { time: '1:00 PM', artist: 'Dominic Fike', stage: 'T-Mobile' },
+      { time: '2:00 PM', artist: 'Hozier', stage: 'T-Mobile' },
+      { time: '3:00 PM', artist: 'The 1975', stage: 'T-Mobile' },
+      { time: '4:00 PM', artist: 'Post Malone', stage: 'T-Mobile' },
+      { time: '5:00 PM', artist: 'Skrillex', stage: 'T-Mobile' },
+      { time: '6:00 PM', artist: 'Megan Thee Stallion', stage: 'T-Mobile' },
+      { time: '7:00 PM', artist: 'The Weeknd', stage: 'T-Mobile' },
+      { time: '8:00 PM', artist: 'Red Hot Chili Peppers', stage: 'T-Mobile' },
+      { time: '9:00 PM', artist: 'Dua Lipa', stage: 'T-Mobile' }
+    ],
+    saturday: [
+      { time: '12:00 PM', artist: 'Beach Weather', stage: 'T-Mobile' },
+      { time: '1:00 PM', artist: 'Tate McRae', stage: 'T-Mobile' },
+      { time: '2:00 PM', artist: 'Lil Baby', stage: 'T-Mobile' },
+      { time: '3:00 PM', artist: 'Khalid', stage: 'T-Mobile' },
+      { time: '4:00 PM', artist: 'Doja Cat', stage: 'T-Mobile' },
+      { time: '5:00 PM', artist: 'J. Cole', stage: 'T-Mobile' },
+      { time: '6:00 PM', artist: 'Ariana Grande', stage: 'T-Mobile' },
+      { time: '7:00 PM', artist: 'Drake', stage: 'T-Mobile' },
+      { time: '8:00 PM', artist: 'Billie Eilish', stage: 'T-Mobile' },
+      { time: '9:00 PM', artist: 'The Strokes', stage: 'T-Mobile' }
+    ],
+    sunday: [
+      { time: '12:00 PM', artist: 'The Aces', stage: 'T-Mobile' },
+      { time: '1:00 PM', artist: 'Conan Gray', stage: 'T-Mobile' },
+      { time: '2:00 PM', artist: 'Lorde', stage: 'T-Mobile' },
+      { time: '3:00 PM', artist: 'Glass Animals', stage: 'T-Mobile' },
+      { time: '4:00 PM', artist: 'Machine Gun Kelly', stage: 'T-Mobile' },
+      { time: '5:00 PM', artist: 'Twenty One Pilots', stage: 'T-Mobile' },
+      { time: '6:00 PM', artist: 'Foo Fighters', stage: 'T-Mobile' },
+      { time: '7:00 PM', artist: 'Green Day', stage: 'T-Mobile' },
+      { time: '8:00 PM', artist: 'Metallica', stage: 'T-Mobile' },
+      { time: '9:00 PM', artist: 'Pearl Jam', stage: 'T-Mobile' }
+    ]
+  };
+
   // Dynamically generate artist selection questions based on selected days
   const generateArtistQuestions = (): any[] => {
-    // ... function body ...
-    return [];
+    const selectedDays = lalaAnswers.lalaDays || [];
+    const questions: any[] = [];
+    selectedDays.forEach((day: string) => {
+      let dayKey = '';
+      if (day.toLowerCase().includes('thursday')) dayKey = 'thursday';
+      else if (day.toLowerCase().includes('friday')) dayKey = 'friday';
+      else if (day.toLowerCase().includes('saturday')) dayKey = 'saturday';
+      else if (day.toLowerCase().includes('sunday')) dayKey = 'sunday';
+      const daySchedule = lollapaloozaSchedule[dayKey as keyof typeof lollapaloozaSchedule];
+      if (daySchedule) {
+        // Sort by time
+        const parseTime = (t: string) => {
+          const [time, ampm] = t.split(' ');
+          let [hour, minute] = time.split(':').map(Number);
+          if (ampm === 'PM' && hour !== 12) hour += 12;
+          if (ampm === 'AM' && hour === 12) hour = 0;
+          return hour * 60 + (minute || 0);
+        };
+        const sorted = [...daySchedule].sort((a, b) => parseTime(a.time) - parseTime(b.time));
+        questions.push({
+          id: `artists_${dayKey}`,
+          question: `Which artists are you planning to see on ${day}?`,
+          type: 'multiSelect',
+          options: sorted.map(set => `${set.time} - ${set.artist}`),
+          required: true,
+          validation: (value: string[]) => {
+            if (!value || value.length === 0) return `Please select at least one artist for ${day}`;
+            return null;
+          }
+        });
+      }
+    });
+    return questions;
   };
 
   // Combine base questions with dynamic artist questions
