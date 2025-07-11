@@ -640,12 +640,11 @@ const App: React.FC = () => {
   };
 
   const handleLalaSubmit = () => {
-    console.log('Lala quiz submitted:', lalaAnswers);
-    alert('Lala quiz submitted! We\'ll match you with people seeing similar artists!');
+    if (user && lalaAnswers) {
+      localStorage.setItem(`lala_${user.email}`, JSON.stringify(lalaAnswers));
+      setLalaProfile(lalaAnswers);
+    }
     setIsLalaMode(false);
-    setLalaCurrentStep(0);
-    setLalaAnswers({});
-    setLalaErrors({});
   };
 
   const handleBackToMain = () => {
@@ -1113,6 +1112,16 @@ const App: React.FC = () => {
   }
 
   // Waiting page (user has already submitted answers)
+  const lalaKey = user ? `lala_${user.email}` : null;
+  const [lalaProfile, setLalaProfile] = useState<Record<string, any> | null>(null);
+
+  useEffect(() => {
+    if (lalaKey) {
+      const lalaData = localStorage.getItem(lalaKey);
+      if (lalaData) setLalaProfile(JSON.parse(lalaData));
+    }
+  }, [lalaKey, isLalaMode, user]);
+
   if (user?.answers && Object.keys(user.answers).length > 0) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-8 safe-area-top safe-area-bottom">
@@ -1183,18 +1192,40 @@ const App: React.FC = () => {
             </p>
           </div>
 
-          {/* Lala Mode Button */}
+          {/* Lala Mode Button and Answers */}
           <div className="mobile-card mb-8">
             <button
-              onClick={handleLalaMode}
+              onClick={() => {
+                setIsLalaMode(true);
+                if (lalaProfile) {
+                  setLalaAnswers(lalaProfile);
+                } else {
+                  setLalaAnswers({});
+                }
+                setLalaCurrentStep(0);
+                setLalaErrors({});
+              }}
               className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white py-4 rounded-xl font-semibold text-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-300 shadow-lg"
             >
-              🎵 Lala Mode
+              {lalaProfile ? 'Edit Lala Mode Answers' : 'Start Lala Mode'}
             </button>
             <p className="text-xs text-gray-500 text-center mt-2">
               Find your Lollapalooza 2025 festival match!
             </p>
           </div>
+          {lalaProfile && (
+            <div className="mobile-card mb-8">
+              <h2 className="text-xl font-bold text-green-700 mb-4">Your Lala Mode Answers</h2>
+              <div className="space-y-2">
+                {Object.entries(lalaProfile).map(([key, value]) => (
+                  <div key={key} className="border-b border-gray-100 pb-2">
+                    <span className="font-semibold text-gray-700">{key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}:</span>
+                    <span className="ml-2 text-gray-600">{Array.isArray(value) ? value.join(', ') : value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Your Answers */}
           <div className="mobile-card">
