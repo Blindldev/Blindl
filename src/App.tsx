@@ -452,8 +452,6 @@ const App: React.FC = () => {
       }
     },
     {
-    },
-    {
       id: 'phone',
       question: 'What is your phone number?',
       type: 'tel',
@@ -1866,6 +1864,7 @@ const App: React.FC = () => {
     if (
       currentQuestion &&
       currentQuestion.type === 'select' &&
+      currentQuestion.id &&
       answers[currentQuestion.id] &&
       !errors[currentQuestion.id]
     ) {
@@ -1873,7 +1872,7 @@ const App: React.FC = () => {
     }
     // Only run when the answer for the current question changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [answers[questions[currentStep]?.id]]);
+  }, [questions, currentStep, answers, errors]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-8 safe-area-top safe-area-bottom">
