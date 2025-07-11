@@ -1200,6 +1200,19 @@ const App: React.FC = () => {
               })}
             </div>
           </div>
+
+          {/* Edit Profile Answers Button */}
+          <button
+            onClick={() => {
+              setIsEditingProfile(true);
+              setAnswers(user.answers || {});
+              setCurrentStep(0);
+              setErrors({});
+            }}
+            className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white py-4 rounded-xl font-semibold text-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-300 shadow-lg mb-4"
+          >
+            Edit Profile Answers
+          </button>
         </div>
 
         {/* Match Popup */}
@@ -1340,6 +1353,69 @@ const App: React.FC = () => {
         return null;
     }
   };
+
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+
+  if (isEditingProfile) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-8 safe-area-top safe-area-bottom">
+        <div className="mobile-container">
+          {/* Header */}
+          <div className="mobile-card mb-8">
+            <div className="flex items-center space-x-4">
+              <img src={user?.picture} alt={user?.name} className="w-10 h-10 rounded-full" />
+              <div>
+                <h2 className="font-semibold text-gray-800">{user?.name}</h2>
+                <p className="text-sm text-gray-600">{user?.email}</p>
+              </div>
+            </div>
+          </div>
+          {/* Question Card */}
+          <div className="mobile-card">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">{currentQuestion.question}</h2>
+            {currentQuestion.required && (
+              <p className="text-sm text-red-500 mb-4">* Required</p>
+            )}
+            <div className="space-y-4">{renderQuestion()}</div>
+            {/* Navigation */}
+            <div className="flex justify-between mt-8">
+              <button
+                onClick={handlePrevious}
+                disabled={currentStep === 0}
+                className={`px-6 py-3 rounded-xl font-medium transition-colors ${
+                  currentStep === 0
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                Previous
+              </button>
+              <button
+                onClick={async () => {
+                  if (!validateCurrentStep()) return;
+                  if (currentStep < questions.length - 1) {
+                    setCurrentStep(prev => prev + 1);
+                  } else {
+                    // On submit, update user and exit editing mode
+                    await submitQuiz();
+                    setIsEditingProfile(false);
+                  }
+                }}
+                disabled={!canProceed || isSubmitting}
+                className={`px-6 py-3 rounded-xl font-medium transition-colors ${
+                  !canProceed || isSubmitting
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'bg-blue-500 text-white hover:bg-blue-600'
+                }`}
+              >
+                {isSubmitting ? 'Submitting...' : currentStep === questions.length - 1 ? 'Save Profile' : 'Next'}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-8 safe-area-top safe-area-bottom">
