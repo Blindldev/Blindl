@@ -922,6 +922,144 @@ const App: React.FC = () => {
     );
   }
 
+  // Lala Mode Quiz Interface
+  if (isLalaMode) {
+    const currentLalaQuestion = allLalaQuestions[lalaCurrentStep];
+    const lalaProgress = ((lalaCurrentStep + 1) / allLalaQuestions.length) * 100;
+
+    const renderLalaQuestion = () => {
+      const question = currentLalaQuestion;
+      const answer = lalaAnswers[question.id];
+      const error = lalaErrors[question.id];
+
+      switch (question.type) {
+        case 'multiSelect':
+          const selectedOptions = Array.isArray(answer) ? answer : [];
+          return (
+            <div>
+              <div className="space-y-3">
+                {question.options?.map((option: string) => (
+                  <div
+                    key={option}
+                    className={`p-4 border-2 rounded-xl cursor-pointer transition-all ${
+                      selectedOptions.includes(option)
+                        ? 'border-green-500 bg-green-50'
+                        : 'border-gray-200 hover:border-green-300'
+                    }`}
+                    onClick={() => {
+                      const newSelection = selectedOptions.includes(option)
+                        ? selectedOptions.filter((o: string) => o !== option)
+                        : [...selectedOptions, option];
+                      handleLalaAnswer(question.id, newSelection);
+                    }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium">{option}</span>
+                      {selectedOptions.includes(option) && (
+                        <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                          <div className="w-2 h-2 bg-white rounded-full"></div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {error && (
+                <p className="text-red-500 text-sm mt-2">{error.message}</p>
+              )}
+            </div>
+          );
+        default:
+          return null;
+      }
+    };
+
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 py-8 safe-area-top safe-area-bottom">
+        <div className="mobile-container">
+          {/* Header */}
+          <div className="mobile-card mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center space-x-4">
+                <img 
+                  src={user?.picture} 
+                  alt={user?.name}
+                  className="w-10 h-10 rounded-full"
+                />
+                <div>
+                  <h2 className="font-semibold text-gray-800">{user?.name}</h2>
+                  <p className="text-sm text-gray-600">{user?.email}</p>
+                </div>
+              </div>
+              <button
+                onClick={handleBackToMain}
+                className="text-gray-500 hover:text-gray-700 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-gray-800">
+                Lala Question {lalaCurrentStep + 1} of {allLalaQuestions.length}
+              </h2>
+              <span className="text-sm text-gray-600">
+                {Math.round(lalaProgress)}% Complete
+              </span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+              <div 
+                className="h-2 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full transition-all duration-500"
+                style={{ width: `${lalaProgress}%` }}
+              ></div>
+            </div>
+          </div>
+
+          {/* Question Card */}
+          <div className="mobile-card">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">
+              {currentLalaQuestion.question}
+            </h2>
+            {currentLalaQuestion.required && (
+              <p className="text-sm text-red-500 mb-4">* Required</p>
+            )}
+            
+            <div className="space-y-4">
+              {renderLalaQuestion()}
+            </div>
+
+            {/* Navigation */}
+            <div className="flex justify-between mt-8">
+              <button
+                onClick={handleLalaPrevious}
+                disabled={lalaCurrentStep === 0}
+                className={`px-6 py-3 rounded-xl font-medium transition-colors ${
+                  lalaCurrentStep === 0
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                Previous
+              </button>
+              
+              <button
+                onClick={handleLalaNext}
+                disabled={!lalaAnswers[currentLalaQuestion?.id] || !!lalaErrors[currentLalaQuestion?.id]}
+                className={`px-6 py-3 rounded-xl font-medium transition-colors ${
+                  !lalaAnswers[currentLalaQuestion?.id] || !!lalaErrors[currentLalaQuestion?.id]
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'bg-green-500 text-white hover:bg-green-600'
+                }`}
+              >
+                {lalaCurrentStep === allLalaQuestions.length - 1 ? 'Submit Lala Profile' : 'Next'}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Waiting page (user has already submitted answers)
   if (user?.answers && Object.keys(user.answers).length > 0) {
     return (
@@ -1165,145 +1303,6 @@ const App: React.FC = () => {
         return null;
     }
   };
-
-  // Lala Mode Quiz Interface
-  if (isLalaMode) {
-    const currentLalaQuestion = allLalaQuestions[lalaCurrentStep];
-    const lalaProgress = ((lalaCurrentStep + 1) / allLalaQuestions.length) * 100;
-
-    const renderLalaQuestion = () => {
-      const question = currentLalaQuestion;
-      const answer = lalaAnswers[question.id];
-      const error = lalaErrors[question.id];
-
-      switch (question.type) {
-        case 'multiSelect':
-          const selectedOptions = Array.isArray(answer) ? answer : [];
-          return (
-            <div>
-              <div className="space-y-3">
-                {question.options?.map((option: string) => (
-                  <div
-                    key={option}
-                    className={`p-4 border-2 rounded-xl cursor-pointer transition-all ${
-                      selectedOptions.includes(option)
-                        ? 'border-green-500 bg-green-50'
-                        : 'border-gray-200 hover:border-green-300'
-                    }`}
-                    onClick={() => {
-                      const newSelection = selectedOptions.includes(option)
-                        ? selectedOptions.filter((o: string) => o !== option)
-                        : [...selectedOptions, option];
-                      handleLalaAnswer(question.id, newSelection);
-                    }}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium">{option}</span>
-                      {selectedOptions.includes(option) && (
-                        <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
-                          <div className="w-2 h-2 bg-white rounded-full"></div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              {error && (
-                <p className="text-red-500 text-sm mt-2">{error.message}</p>
-              )}
-            </div>
-          );
-        
-        default:
-          return null;
-      }
-    };
-
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 py-8 safe-area-top safe-area-bottom">
-        <div className="mobile-container">
-          {/* Header */}
-          <div className="mobile-card mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center space-x-4">
-                <img 
-                  src={user?.picture} 
-                  alt={user?.name}
-                  className="w-10 h-10 rounded-full"
-                />
-                <div>
-                  <h2 className="font-semibold text-gray-800">{user?.name}</h2>
-                  <p className="text-sm text-gray-600">{user?.email}</p>
-                </div>
-              </div>
-              <button
-                onClick={handleBackToMain}
-                className="text-gray-500 hover:text-gray-700 transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-gray-800">
-                Lala Question {lalaCurrentStep + 1} of {allLalaQuestions.length}
-              </h2>
-              <span className="text-sm text-gray-600">
-                {Math.round(lalaProgress)}% Complete
-              </span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-              <div 
-                className="h-2 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full transition-all duration-500"
-                style={{ width: `${lalaProgress}%` }}
-              ></div>
-            </div>
-          </div>
-
-          {/* Question Card */}
-          <div className="mobile-card">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">
-              {currentLalaQuestion.question}
-            </h2>
-            {currentLalaQuestion.required && (
-              <p className="text-sm text-red-500 mb-4">* Required</p>
-            )}
-            
-            <div className="space-y-4">
-              {renderLalaQuestion()}
-            </div>
-
-            {/* Navigation */}
-            <div className="flex justify-between mt-8">
-              <button
-                onClick={handleLalaPrevious}
-                disabled={lalaCurrentStep === 0}
-                className={`px-6 py-3 rounded-xl font-medium transition-colors ${
-                  lalaCurrentStep === 0
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
-              >
-                Previous
-              </button>
-              
-              <button
-                onClick={handleLalaNext}
-                disabled={!lalaAnswers[currentLalaQuestion?.id] || !!lalaErrors[currentLalaQuestion?.id]}
-                className={`px-6 py-3 rounded-xl font-medium transition-colors ${
-                  !lalaAnswers[currentLalaQuestion?.id] || !!lalaErrors[currentLalaQuestion?.id]
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : 'bg-green-500 text-white hover:bg-green-600'
-                }`}
-              >
-                {lalaCurrentStep === allLalaQuestions.length - 1 ? 'Submit Lala Profile' : 'Next'}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-8 safe-area-top safe-area-bottom">
