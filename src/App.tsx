@@ -270,12 +270,12 @@ const RescheduleModal: React.FC<{
               <h2 className="text-xl font-bold text-gray-800 mb-4">Reschedule Date</h2>
               <div className="mb-6">
                 <label className="block text-gray-700 font-medium mb-2">Select a new date:</label>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="flex overflow-x-auto gap-3 pb-2 scrollbar-hide">
                   {availableDates.map((date) => (
                     <button
                       key={date.toISOString()}
                       onClick={() => onDateSelect(date)}
-                      className={`py-2 px-3 rounded-xl font-medium border transition-colors ${
+                      className={`py-2 px-3 rounded-xl font-medium border transition-colors flex-shrink-0 min-w-[100px] ${
                         selectedDate && date.toDateString() === selectedDate.toDateString()
                           ? 'bg-blue-500 text-white border-blue-500'
                           : 'bg-white text-gray-700 border-gray-200 hover:bg-blue-50'
@@ -288,12 +288,12 @@ const RescheduleModal: React.FC<{
               </div>
               <div className="mb-6">
                 <label className="block text-gray-700 font-medium mb-2">Select a new time:</label>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="flex overflow-x-auto gap-3 pb-2 scrollbar-hide">
                   {timeOptions.map((time) => (
                     <button
                       key={time}
                       onClick={() => onTimeSelect(time)}
-                      className={`py-2 px-3 rounded-xl font-medium border transition-colors ${
+                      className={`py-2 px-3 rounded-xl font-medium border transition-colors flex-shrink-0 min-w-[80px] ${
                         selectedTime === time
                           ? 'bg-blue-500 text-white border-blue-500'
                           : 'bg-white text-gray-700 border-gray-200 hover:bg-blue-50'
@@ -555,7 +555,7 @@ const App: React.FC = () => {
       id: 'lalaDays',
       question: 'Which days are you attending Lollapalooza 2025?',
       type: 'multiSelect',
-      options: ['Thursday, August 7', 'Friday, August 8', 'Saturday, August 9', 'Sunday, August 10'],
+      options: ['Thursday, August 7', 'Friday, August 8', 'Saturday, August 9', 'Sunday, August 10', 'No longer going'],
       required: true,
       validation: (value: string[]) => {
         if (!value || value.length === 0) return 'Please select at least one day';
@@ -619,8 +619,10 @@ const App: React.FC = () => {
   // Dynamically generate artist selection questions based on selected days
   const generateArtistQuestions = (): any[] => {
     const selectedDays = lalaAnswers.lalaDays || [];
+    // Filter out "No longer going" from selected days
+    const validDays = selectedDays.filter((day: string) => day !== 'No longer going');
     const questions: any[] = [];
-    selectedDays.forEach((day: string) => {
+    validDays.forEach((day: string) => {
       let dayKey = '';
       if (day.toLowerCase().includes('thursday')) dayKey = 'thursday';
       else if (day.toLowerCase().includes('friday')) dayKey = 'friday';
@@ -1147,7 +1149,7 @@ const App: React.FC = () => {
   }
 
   // Phone verification modal
-  if (phoneVerificationStep !== 'complete' && currentQuestion?.id === 'phone' && answers.phone) {
+  if (phoneVerificationStep === 'phone' || phoneVerificationStep === 'code') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4">
         <motion.div
@@ -1525,7 +1527,7 @@ const App: React.FC = () => {
               Find your Lollapalooza 2025 festival match!
             </p>
           </div>
-          {lalaProfile && (
+          {lalaProfile && !lalaProfile.lalaDays?.includes('No longer going') && (
             <div className="mobile-card mb-8">
               <h2 className="text-xl font-bold text-green-700 mb-4">Your Lala Mode Answers</h2>
               <div className="space-y-2">
