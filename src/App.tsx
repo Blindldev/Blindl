@@ -980,18 +980,14 @@ const App: React.FC = () => {
 
   const handleAnswer = (questionId: string, answer: any) => {
     setAnswers(prev => ({ ...prev, [questionId]: answer }));
-    
-    // Clear error when user starts typing
     setErrors(prev => {
       const newErrors = { ...prev };
       delete newErrors[questionId];
       return newErrors;
     });
-
     // Auto-advance for single select questions (not multi-select, text, textarea, etc.)
     const currentQuestion = questions[currentStep];
     if (currentQuestion && currentQuestion.id === questionId && currentQuestion.type === 'select' && answer && answer !== '') {
-      // Use a longer delay to ensure state has updated
       setTimeout(() => {
         handleNext();
       }, 100);
@@ -1118,7 +1114,7 @@ const App: React.FC = () => {
   };
 
   // Current question
-  const currentQuestion = questions[currentStep];
+  const currentQuestion = (currentStep >= 0 && currentStep < questions.length) ? questions[currentStep] : questions[0];
   const progress = ((currentStep + 1) / questions.length) * 100;
   const canProceed = currentQuestion && (
     currentQuestion.required ? 
@@ -1846,31 +1842,6 @@ const App: React.FC = () => {
       </div>
     );
   }
-
-  // --- Defensive auto-advance useEffect ---
-  useEffect(() => {
-    if (
-      Array.isArray(questions) &&
-      currentStep >= 0 &&
-      currentStep < questions.length
-    ) {
-      const currentQuestion = questions[currentStep];
-      if (
-        currentQuestion &&
-        currentQuestion.type === 'select' &&
-        currentQuestion.id &&
-        answers[currentQuestion.id] &&
-        !errors[currentQuestion.id]
-      ) {
-        // Only auto-advance if not at the last question
-        if (currentStep < questions.length - 1) {
-          handleNext();
-        }
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [questions, currentStep, answers, errors]);
-  // --- Defensive handleNext ---
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-8 safe-area-top safe-area-bottom">
