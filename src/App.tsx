@@ -1043,7 +1043,7 @@ const MatchPopup: React.FC<{
               style={{ transformStyle: 'preserve-3d' }}
             >
               {/* Front Side - Match Info */}
-              <div className="w-full h-full" style={{ backfaceVisibility: 'hidden' }}>
+              <div className="w-full h-full overflow-y-auto" style={{ backfaceVisibility: 'hidden' }}>
                 <div className="relative">
                   <img
                     src={match.picture}
@@ -1100,7 +1100,7 @@ const MatchPopup: React.FC<{
 
               {/* Back Side - Venue Details */}
               <div 
-                className="absolute inset-0 w-full h-full bg-white" 
+                className="absolute inset-0 w-full h-full bg-white overflow-y-auto" 
                 style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
               >
                 <div className="relative">
@@ -1139,6 +1139,28 @@ const MatchPopup: React.FC<{
                     <p className="text-gray-600 text-sm leading-relaxed">
                       {match.bio}
                     </p>
+                  </div>
+
+                  {/* Action Buttons on Back Side */}
+                  <div className="flex space-x-3 mb-6">
+                    <button
+                      onClick={() => onResponse('yes')}
+                      className="flex-1 bg-green-500 text-white py-3 rounded-xl font-semibold hover:bg-green-600 transition-colors"
+                    >
+                      Yes
+                    </button>
+                    <button
+                      onClick={() => onResponse('no')}
+                      className="flex-1 bg-red-500 text-white py-3 rounded-xl font-semibold hover:bg-red-600 transition-colors"
+                    >
+                      No
+                    </button>
+                    <button
+                      onClick={() => onResponse('reschedule')}
+                      className="flex-1 bg-yellow-500 text-white py-3 rounded-xl font-semibold hover:bg-yellow-600 transition-colors"
+                    >
+                      Reschedule
+                    </button>
                   </div>
 
                   {/* Back Button */}
