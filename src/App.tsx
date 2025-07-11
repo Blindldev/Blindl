@@ -419,6 +419,157 @@ const App: React.FC = () => {
   // Lala Mode profile state
   const lalaKey = user ? `lala_${user.email}` : null;
   const [lalaProfile, setLalaProfile] = useState<Record<string, any> | null>(null);
+
+  // Questions array
+  const questions: any[] = [
+    {
+      id: 'gender',
+      question: 'What is your gender?',
+      type: 'select',
+      options: ['Male', 'Female', 'Non-binary', 'Prefer not to say'],
+      required: true
+    },
+    {
+      id: 'name',
+      question: 'What is your name?',
+      type: 'text',
+      placeholder: 'Enter your full name',
+      required: true
+    },
+    {
+      id: 'age',
+      question: 'How old are you?',
+      type: 'number',
+      placeholder: 'Enter your age',
+      required: true,
+      validation: (value: string) => {
+        const age = parseInt(value);
+        if (!value) return 'Age is required';
+        if (isNaN(age)) return 'Please enter a valid number';
+        if (age < 18) return 'You must be at least 18 years old';
+        if (age > 99) return 'Please enter a valid age (18-99)';
+        return null;
+      }
+    },
+    {
+      id: 'email',
+      question: 'What is your email address?',
+      type: 'email',
+      placeholder: 'Enter your email',
+      required: true
+    },
+    {
+      id: 'phone',
+      question: 'What is your phone number?',
+      type: 'tel',
+      placeholder: '+1 (555) 123-4567',
+      required: true,
+      validation: (value: string) => {
+        if (!value) return 'Phone number is required';
+        const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+        if (!phoneRegex.test(value.replace(/[\s\-\(\)]/g, ''))) {
+          return 'Please enter a valid phone number';
+        }
+        return null;
+      }
+    },
+    {
+      id: 'orientation',
+      question: 'What is your sexual orientation?',
+      type: 'select',
+      options: ['Straight', 'Gay', 'Lesbian', 'Bisexual', 'Pansexual', 'Asexual', 'Other'],
+      required: true
+    },
+    {
+      id: 'goals',
+      question: 'What are you looking for?',
+      type: 'multiSelect',
+      options: ['Serious relationship', 'Casual dating', 'Friendship', 'Hookups', 'Marriage', 'Not sure yet'],
+      required: true
+    },
+    {
+      id: 'drinking',
+      question: 'Do you drink alcohol?',
+      type: 'select',
+      options: ['Yes, regularly', 'Yes, occasionally', 'No, I don\'t drink', 'I\'m sober'],
+      required: true
+    },
+    {
+      id: 'smoking',
+      question: 'Do you smoke?',
+      type: 'select',
+      options: ['Yes, cigarettes', 'Yes, vaping', 'Yes, marijuana', 'No, I don\'t smoke', 'I\'m trying to quit'],
+      required: true
+    },
+    {
+      id: 'dates',
+      question: 'What days are you typically available for dates?',
+      type: 'multiSelect',
+      options: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+      required: true,
+      validation: (value: string[]) => {
+        if (!value || value.length === 0) return 'Please select at least one day';
+        return null;
+      }
+    },
+    {
+      id: 'description',
+      question: 'Tell us about yourself',
+      type: 'textarea',
+      placeholder: 'Share your interests, hobbies, what makes you unique...',
+      required: true,
+      validation: (value: string) => {
+        if (!value.trim()) return 'Description is required';
+        if (value.trim().length < 10) return 'Description must be at least 10 characters';
+        if (value.trim().length > 500) return 'Description must be less than 500 characters';
+        return null;
+      }
+    },
+    {
+      id: 'idealPartner',
+      question: 'Describe your ideal partner',
+      type: 'textarea',
+      placeholder: 'What qualities are you looking for in a partner?',
+      required: true,
+      validation: (value: string) => {
+        if (!value.trim()) return 'Description is required';
+        if (value.trim().length < 10) return 'Description must be at least 10 characters';
+        if (value.trim().length > 500) return 'Description must be less than 500 characters';
+        return null;
+      }
+    },
+    {
+      id: 'howFound',
+      question: 'How did you hear about us?',
+      type: 'select',
+      options: ['Social media', 'Friend recommendation', 'Online search', 'Event flyer', 'Other'],
+      required: true
+    }
+  ];
+
+  // Lala Mode questions
+  const lalaQuestions: any[] = [
+    {
+      id: 'lalaDays',
+      question: 'Which days are you attending Lollapalooza 2025?',
+      type: 'multiSelect',
+      options: ['Thursday, August 7', 'Friday, August 8', 'Saturday, August 9', 'Sunday, August 10'],
+      required: true,
+      validation: (value: string[]) => {
+        if (!value || value.length === 0) return 'Please select at least one day';
+        return null;
+      }
+    }
+  ];
+
+  // Dynamically generate artist selection questions based on selected days
+  const generateArtistQuestions = (): any[] => {
+    // ... function body ...
+    return [];
+  };
+
+  // Combine base questions with dynamic artist questions
+  const allLalaQuestions: any[] = [...lalaQuestions, ...generateArtistQuestions()];
   useEffect(() => {
     if (lalaKey) {
       const lalaData = localStorage.getItem(lalaKey);
@@ -601,278 +752,6 @@ const App: React.FC = () => {
     '6:00 PM', '6:30 PM', '7:00 PM', '7:30 PM',
     '8:00 PM', '8:30 PM', '9:00 PM', '9:30 PM'
   ];
-
-  // Lollapalooza 2025 Schedule
-  const lollapaloozaSchedule = {
-    thursday: [
-      { time: '12:00 PM', artist: 'The Beaches', stage: 'T-Mobile' },
-      { time: '1:00 PM', artist: 'The Last Dinner Party', stage: 'T-Mobile' },
-      { time: '2:00 PM', artist: 'Renée Rapp', stage: 'T-Mobile' },
-      { time: '3:00 PM', artist: 'Tyler, The Creator', stage: 'T-Mobile' },
-      { time: '4:00 PM', artist: 'SZA', stage: 'T-Mobile' },
-      { time: '5:00 PM', artist: 'Blink-182', stage: 'T-Mobile' },
-      { time: '6:00 PM', artist: 'The Killers', stage: 'T-Mobile' },
-      { time: '7:00 PM', artist: 'Future', stage: 'T-Mobile' },
-      { time: '8:00 PM', artist: 'Kendrick Lamar', stage: 'T-Mobile' },
-      { time: '9:00 PM', artist: 'Lana Del Rey', stage: 'T-Mobile' }
-    ],
-    friday: [
-      { time: '12:00 PM', artist: 'The Marías', stage: 'T-Mobile' },
-      { time: '1:00 PM', artist: 'Dominic Fike', stage: 'T-Mobile' },
-      { time: '2:00 PM', artist: 'Hozier', stage: 'T-Mobile' },
-      { time: '3:00 PM', artist: 'The 1975', stage: 'T-Mobile' },
-      { time: '4:00 PM', artist: 'Post Malone', stage: 'T-Mobile' },
-      { time: '5:00 PM', artist: 'Skrillex', stage: 'T-Mobile' },
-      { time: '6:00 PM', artist: 'Megan Thee Stallion', stage: 'T-Mobile' },
-      { time: '7:00 PM', artist: 'The Weeknd', stage: 'T-Mobile' },
-      { time: '8:00 PM', artist: 'Red Hot Chili Peppers', stage: 'T-Mobile' },
-      { time: '9:00 PM', artist: 'Dua Lipa', stage: 'T-Mobile' }
-    ],
-    saturday: [
-      { time: '12:00 PM', artist: 'Beach Weather', stage: 'T-Mobile' },
-      { time: '1:00 PM', artist: 'Tate McRae', stage: 'T-Mobile' },
-      { time: '2:00 PM', artist: 'Lil Baby', stage: 'T-Mobile' },
-      { time: '3:00 PM', artist: 'Khalid', stage: 'T-Mobile' },
-      { time: '4:00 PM', artist: 'Doja Cat', stage: 'T-Mobile' },
-      { time: '5:00 PM', artist: 'J. Cole', stage: 'T-Mobile' },
-      { time: '6:00 PM', artist: 'Ariana Grande', stage: 'T-Mobile' },
-      { time: '7:00 PM', artist: 'Drake', stage: 'T-Mobile' },
-      { time: '8:00 PM', artist: 'Billie Eilish', stage: 'T-Mobile' },
-      { time: '9:00 PM', artist: 'The Strokes', stage: 'T-Mobile' }
-    ],
-    sunday: [
-      { time: '12:00 PM', artist: 'The Aces', stage: 'T-Mobile' },
-      { time: '1:00 PM', artist: 'Conan Gray', stage: 'T-Mobile' },
-      { time: '2:00 PM', artist: 'Lorde', stage: 'T-Mobile' },
-      { time: '3:00 PM', artist: 'Glass Animals', stage: 'T-Mobile' },
-      { time: '4:00 PM', artist: 'Machine Gun Kelly', stage: 'T-Mobile' },
-      { time: '5:00 PM', artist: 'Twenty One Pilots', stage: 'T-Mobile' },
-      { time: '6:00 PM', artist: 'Foo Fighters', stage: 'T-Mobile' },
-      { time: '7:00 PM', artist: 'Green Day', stage: 'T-Mobile' },
-      { time: '8:00 PM', artist: 'Metallica', stage: 'T-Mobile' },
-      { time: '9:00 PM', artist: 'Pearl Jam', stage: 'T-Mobile' }
-    ]
-  };
-
-  // Questions array
-  const questions: any[] = [
-    {
-      id: 'gender',
-      question: 'What is your gender?',
-      type: 'select',
-      options: ['Male', 'Female', 'Non-binary', 'Prefer not to say'],
-      required: true
-    },
-    {
-      id: 'name',
-      question: 'What is your name?',
-      type: 'text',
-      placeholder: 'Enter your full name',
-      required: true
-    },
-    {
-      id: 'age',
-      question: 'How old are you?',
-      type: 'number',
-      placeholder: 'Enter your age',
-      required: true,
-      validation: (value: string) => {
-        const age = parseInt(value);
-        if (!value) return 'Age is required';
-        if (isNaN(age)) return 'Please enter a valid number';
-        if (age < 18) return 'You must be at least 18 years old';
-        if (age > 99) return 'Please enter a valid age (18-99)';
-        return null;
-      }
-    },
-    {
-      id: 'email',
-      question: 'What is your email address?',
-      type: 'email',
-      placeholder: 'Enter your email',
-      required: true
-    },
-    {
-      id: 'phone',
-      question: 'What is your phone number?',
-      type: 'tel',
-      placeholder: '+1 (555) 123-4567',
-      required: true,
-      validation: (value: string) => {
-        if (!value) return 'Phone number is required';
-        const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
-        if (!phoneRegex.test(value.replace(/[\s\-\(\)]/g, ''))) {
-          return 'Please enter a valid phone number';
-        }
-        return null;
-      }
-    },
-    {
-      id: 'orientation',
-      question: 'What is your sexual orientation?',
-      type: 'select',
-      options: ['Straight', 'Gay', 'Lesbian', 'Bisexual', 'Pansexual', 'Asexual', 'Other'],
-      required: true
-    },
-    {
-      id: 'goals',
-      question: 'What are you looking for?',
-      type: 'multiSelect',
-      options: ['Serious relationship', 'Casual dating', 'Friendship', 'Hookups', 'Marriage', 'Not sure yet'],
-      required: true
-    },
-    {
-      id: 'drinking',
-      question: 'Do you drink alcohol?',
-      type: 'select',
-      options: ['Yes, regularly', 'Yes, occasionally', 'No, I don\'t drink', 'I\'m sober'],
-      required: true
-    },
-    {
-      id: 'smoking',
-      question: 'Do you smoke?',
-      type: 'select',
-      options: ['Yes, cigarettes', 'Yes, vaping', 'Yes, marijuana', 'No, I don\'t smoke', 'I\'m trying to quit'],
-      required: true
-    },
-    {
-      id: 'dates',
-      question: 'What days are you typically available for dates?',
-      type: 'multiSelect',
-      options: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
-      required: true,
-      validation: (value: string[]) => {
-        if (!value || value.length === 0) return 'Please select at least one day';
-        return null;
-      }
-    },
-    {
-      id: 'description',
-      question: 'Tell us about yourself',
-      type: 'textarea',
-      placeholder: 'Share your interests, hobbies, what makes you unique...',
-      required: true,
-      validation: (value: string) => {
-        if (!value.trim()) return 'Description is required';
-        if (value.trim().length < 10) return 'Description must be at least 10 characters';
-        if (value.trim().length > 500) return 'Description must be less than 500 characters';
-        return null;
-      }
-    },
-    {
-      id: 'idealPartner',
-      question: 'Describe your ideal partner',
-      type: 'textarea',
-      placeholder: 'What qualities are you looking for in a partner?',
-      required: true,
-      validation: (value: string) => {
-        if (!value.trim()) return 'Description is required';
-        if (value.trim().length < 10) return 'Description must be at least 10 characters';
-        if (value.trim().length > 500) return 'Description must be less than 500 characters';
-        return null;
-      }
-    },
-    {
-      id: 'howFound',
-      question: 'How did you hear about us?',
-      type: 'select',
-      options: ['Social media', 'Friend recommendation', 'Online search', 'Event flyer', 'Other'],
-      required: true
-    }
-  ];
-
-  // Lala Mode questions
-  const lalaQuestions: any[] = [
-    {
-      id: 'lalaDays',
-      question: 'Which days are you attending Lollapalooza 2025?',
-      type: 'multiSelect',
-      options: ['Thursday, August 7', 'Friday, August 8', 'Saturday, August 9', 'Sunday, August 10'],
-      required: true,
-      validation: (value: string[]) => {
-        if (!value || value.length === 0) return 'Please select at least one day';
-        return null;
-      }
-    }
-  ];
-
-  // Dynamically generate artist selection questions based on selected days
-  const generateArtistQuestions = (): any[] => {
-    // ... function body ...
-    return [];
-  };
-
-  // Combine base questions with dynamic artist questions
-  const allLalaQuestions: any[] = [...lalaQuestions, ...generateArtistQuestions()];
-
-  // Matching UI functions
-  const handleTestMatch = () => {
-    console.log('Test Match button clicked!');
-    const nextMatch = dummyMatches[matchIndex];
-    setCurrentMatch(nextMatch);
-    setShowMatchPopup(true);
-    setShowMatchDetails(false);
-    setMatchIndex((prev) => (prev + 1) % dummyMatches.length);
-    console.log('Match popup should now be visible');
-  };
-
-  const handleMatchResponse = (response: 'yes' | 'no' | 'reschedule') => {
-    // Handle the match response
-    console.log('Match response:', response);
-    
-    if (response === 'reschedule') {
-      setShowRescheduleModal(true);
-      return;
-    }
-    
-    setShowMatchPopup(false);
-    setCurrentMatch(null);
-    setShowMatchDetails(false);
-  };
-
-  const handleToggleMatchDetails = () => {
-    setShowMatchDetails(!showMatchDetails);
-  };
-
-  const handleRescheduleSubmit = () => {
-    if (!selectedDate || !selectedTime) {
-      alert('Please select both a date and time.');
-      return;
-    }
-    
-    console.log('Reschedule request:', {
-      originalMatch: currentMatch,
-      newDate: selectedDate,
-      newTime: selectedTime
-    });
-    
-    // Here you would typically send this to your backend
-    alert(`Reschedule request sent! New date: ${selectedDate.toLocaleDateString()} at ${selectedTime}`);
-    
-    // Close modals and reset
-    setShowRescheduleModal(false);
-    setShowMatchPopup(false);
-    setCurrentMatch(null);
-    setShowMatchDetails(false);
-    setSelectedDate(null);
-    setSelectedTime('');
-  };
-
-  const handleDateSelect = (date: Date) => {
-    setSelectedDate(date);
-  };
-
-  const getAvailableDates = () => {
-    const dates: Date[] = [];
-    const today = new Date();
-    const twoWeeksFromNow = new Date(today.getTime() + (14 * 24 * 60 * 60 * 1000));
-    
-    for (let d = new Date(today); d <= twoWeeksFromNow; d.setDate(d.getDate() + 1)) {
-      dates.push(new Date(d));
-    }
-    
-    return dates;
-  };
 
   // Lala Mode functions
   const handleLalaAnswer = (questionId: string, answer: any) => {
@@ -1078,6 +957,68 @@ const App: React.FC = () => {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  // Matching UI functions (move these up so they are defined before use)
+  const handleTestMatch = () => {
+    console.log('Test Match button clicked!');
+    const nextMatch = dummyMatches[matchIndex];
+    setCurrentMatch(nextMatch);
+    setShowMatchPopup(true);
+    setShowMatchDetails(false);
+    setMatchIndex((prev) => (prev + 1) % dummyMatches.length);
+    console.log('Match popup should now be visible');
+  };
+
+  const handleMatchResponse = (response: 'yes' | 'no' | 'reschedule') => {
+    // Handle the match response
+    console.log('Match response:', response);
+    if (response === 'reschedule') {
+      setShowRescheduleModal(true);
+      return;
+    }
+    setShowMatchPopup(false);
+    setCurrentMatch(null);
+    setShowMatchDetails(false);
+  };
+
+  const handleToggleMatchDetails = () => {
+    setShowMatchDetails(!showMatchDetails);
+  };
+
+  const handleRescheduleSubmit = () => {
+    if (!selectedDate || !selectedTime) {
+      alert('Please select both a date and time.');
+      return;
+    }
+    console.log('Reschedule request:', {
+      originalMatch: currentMatch,
+      newDate: selectedDate,
+      newTime: selectedTime
+    });
+    // Here you would typically send this to your backend
+    alert(`Reschedule request sent! New date: ${selectedDate.toLocaleDateString()} at ${selectedTime}`);
+    // Close modals and reset
+    setShowRescheduleModal(false);
+    setShowMatchPopup(false);
+    setCurrentMatch(null);
+    setShowMatchDetails(false);
+    setSelectedDate(null);
+    setSelectedTime('');
+  };
+
+  const handleDateSelect = (date: Date) => {
+    setSelectedDate(date);
+  };
+
+  const getAvailableDates = () => {
+    const dates: Date[] = [];
+    const today = new Date();
+    const twoWeeksFromNow = new Date(today.getTime() + (14 * 24 * 60 * 60 * 1000));
+    for (let d = new Date(today); d <= twoWeeksFromNow; d.setDate(d.getDate() + 1)) {
+      dates.push(new Date(d));
+    }
+    return dates;
   };
 
   // Current question
