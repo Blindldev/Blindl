@@ -1527,7 +1527,7 @@ const App: React.FC = () => {
                 const question = questions.find(q => q.id === key);
                 if (!question || question.type === 'textarea') return null;
                 const isEditing = editingField === key;
-                const isEditable = question.type !== 'email' && question.type !== 'tel';
+                const isEditable = key !== 'email' && key !== 'phone';
                 return (
                   <div key={key} className="border border-gray-200 rounded-xl p-4 flex items-center justify-between mb-2">
                     <div className="flex-1">
@@ -1578,6 +1578,7 @@ const App: React.FC = () => {
               const question = questions.find(q => q.id === key);
               if (!question || question.type !== 'textarea') return null;
               const isEditing = editingField === key;
+              const isEditable = key !== 'email' && key !== 'phone';
               return (
                 <div key={key} className="border border-gray-200 rounded-xl p-4 my-4 w-full">
                   <h3 className="font-semibold text-gray-800 mb-2">{question.question}</h3>
@@ -1608,13 +1609,15 @@ const App: React.FC = () => {
                         >Cancel</button>
                       </>
                     ) : (
-                      <button
-                        className="text-blue-500 hover:text-blue-700"
-                        onClick={() => { setEditingField(key); setEditingValue(value); }}
-                        aria-label={`Edit ${question.question}`}
-                      >
-                        ✎
-                      </button>
+                      isEditable && (
+                        <button
+                          className="text-blue-500 hover:text-blue-700"
+                          onClick={() => { setEditingField(key); setEditingValue(value); }}
+                          aria-label={`Edit ${question.question}`}
+                        >
+                          ✎
+                        </button>
+                      )
                     )}
                   </div>
                 </div>
