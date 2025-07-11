@@ -604,13 +604,6 @@ const App: React.FC = () => {
   };
 
   // Lala Mode functions
-  const handleLalaMode = () => {
-    setIsLalaMode(true);
-    setLalaCurrentStep(0);
-    setLalaAnswers({});
-    setLalaErrors({});
-  };
-
   const handleLalaAnswer = (questionId: string, answer: any) => {
     setLalaAnswers(prev => ({ ...prev, [questionId]: answer }));
     
