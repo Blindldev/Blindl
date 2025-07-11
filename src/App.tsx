@@ -1149,7 +1149,7 @@ const App: React.FC = () => {
   }
 
   // Phone verification modal
-  if (phoneVerificationStep === 'phone' || phoneVerificationStep === 'code') {
+  if (isAuthenticated && (phoneVerificationStep === 'phone' || phoneVerificationStep === 'code')) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4">
         <motion.div
@@ -1746,7 +1746,12 @@ const App: React.FC = () => {
                       ? 'border-blue-500 bg-blue-50' 
                       : 'border-gray-200 hover:border-blue-300'
                   }`}
-                  onClick={() => handleAnswer(question.id, option)}
+                  onClick={() => {
+                    handleAnswer(question.id, option);
+                    setTimeout(() => {
+                      handleNext();
+                    }, 0);
+                  }}
                 >
                   <span className="font-medium">{option}</span>
                 </div>
