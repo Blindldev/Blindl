@@ -57,6 +57,12 @@ const App: React.FC = () => {
   const [showRescheduleModal, setShowRescheduleModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string>('');
+  
+  // Lala Mode state
+  const [isLalaMode, setIsLalaMode] = useState(false);
+  const [lalaAnswers, setLalaAnswers] = useState<Record<string, any>>({});
+  const [lalaCurrentStep, setLalaCurrentStep] = useState(0);
+  const [lalaErrors, setLalaErrors] = useState<Record<string, ValidationError>>({});
 
   // Dummy matches with different women's images
   const dummyMatches: Match[] = [
@@ -152,6 +158,59 @@ const App: React.FC = () => {
     '8:00 PM', '8:30 PM', '9:00 PM', '9:30 PM'
   ];
 
+  // Lollapalooza 2025 Schedule
+  const lollapaloozaSchedule = {
+    thursday: [
+      { time: '12:00 PM', artist: 'The Beaches', stage: 'T-Mobile' },
+      { time: '1:00 PM', artist: 'The Last Dinner Party', stage: 'T-Mobile' },
+      { time: '2:00 PM', artist: 'Renée Rapp', stage: 'T-Mobile' },
+      { time: '3:00 PM', artist: 'Tyler, The Creator', stage: 'T-Mobile' },
+      { time: '4:00 PM', artist: 'SZA', stage: 'T-Mobile' },
+      { time: '5:00 PM', artist: 'Blink-182', stage: 'T-Mobile' },
+      { time: '6:00 PM', artist: 'The Killers', stage: 'T-Mobile' },
+      { time: '7:00 PM', artist: 'Future', stage: 'T-Mobile' },
+      { time: '8:00 PM', artist: 'Kendrick Lamar', stage: 'T-Mobile' },
+      { time: '9:00 PM', artist: 'Lana Del Rey', stage: 'T-Mobile' }
+    ],
+    friday: [
+      { time: '12:00 PM', artist: 'The Marías', stage: 'T-Mobile' },
+      { time: '1:00 PM', artist: 'Dominic Fike', stage: 'T-Mobile' },
+      { time: '2:00 PM', artist: 'Hozier', stage: 'T-Mobile' },
+      { time: '3:00 PM', artist: 'The 1975', stage: 'T-Mobile' },
+      { time: '4:00 PM', artist: 'Post Malone', stage: 'T-Mobile' },
+      { time: '5:00 PM', artist: 'Skrillex', stage: 'T-Mobile' },
+      { time: '6:00 PM', artist: 'Megan Thee Stallion', stage: 'T-Mobile' },
+      { time: '7:00 PM', artist: 'The Weeknd', stage: 'T-Mobile' },
+      { time: '8:00 PM', artist: 'Red Hot Chili Peppers', stage: 'T-Mobile' },
+      { time: '9:00 PM', artist: 'Dua Lipa', stage: 'T-Mobile' }
+    ],
+    saturday: [
+      { time: '12:00 PM', artist: 'Beach Weather', stage: 'T-Mobile' },
+      { time: '1:00 PM', artist: 'Tate McRae', stage: 'T-Mobile' },
+      { time: '2:00 PM', artist: 'Lil Baby', stage: 'T-Mobile' },
+      { time: '3:00 PM', artist: 'Khalid', stage: 'T-Mobile' },
+      { time: '4:00 PM', artist: 'Doja Cat', stage: 'T-Mobile' },
+      { time: '5:00 PM', artist: 'J. Cole', stage: 'T-Mobile' },
+      { time: '6:00 PM', artist: 'Ariana Grande', stage: 'T-Mobile' },
+      { time: '7:00 PM', artist: 'Drake', stage: 'T-Mobile' },
+      { time: '8:00 PM', artist: 'Billie Eilish', stage: 'T-Mobile' },
+      { time: '9:00 PM', artist: 'The Strokes', stage: 'T-Mobile' }
+    ],
+    sunday: [
+      { time: '12:00 PM', artist: 'The Aces', stage: 'T-Mobile' },
+      { time: '1:00 PM', artist: 'Conan Gray', stage: 'T-Mobile' },
+      { time: '2:00 PM', artist: 'Lorde', stage: 'T-Mobile' },
+      { time: '3:00 PM', artist: 'Glass Animals', stage: 'T-Mobile' },
+      { time: '4:00 PM', artist: 'Machine Gun Kelly', stage: 'T-Mobile' },
+      { time: '5:00 PM', artist: 'Twenty One Pilots', stage: 'T-Mobile' },
+      { time: '6:00 PM', artist: 'Foo Fighters', stage: 'T-Mobile' },
+      { time: '7:00 PM', artist: 'Green Day', stage: 'T-Mobile' },
+      { time: '8:00 PM', artist: 'Metallica', stage: 'T-Mobile' },
+      { time: '9:00 PM', artist: 'Pearl Jam', stage: 'T-Mobile' }
+    ]
+  };
+
+  // Questions array
   const questions = [
     {
       id: 'gender',
@@ -183,10 +242,17 @@ const App: React.FC = () => {
       }
     },
     {
+      id: 'email',
+      question: 'What is your email address?',
+      type: 'email',
+      placeholder: 'Enter your email',
+      required: true
+    },
+    {
       id: 'phone',
       question: 'What is your phone number?',
       type: 'tel',
-      placeholder: 'Enter your phone number',
+      placeholder: '+1 (555) 123-4567',
       required: true,
       validation: (value: string) => {
         if (!value) return 'Phone number is required';
@@ -201,39 +267,46 @@ const App: React.FC = () => {
       id: 'orientation',
       question: 'What is your sexual orientation?',
       type: 'select',
-      options: ['Straight', 'Gay', 'Lesbian', 'Bisexual', 'Pansexual', 'Asexual', 'Other', 'Prefer not to say'],
+      options: ['Straight', 'Gay', 'Lesbian', 'Bisexual', 'Pansexual', 'Asexual', 'Other'],
       required: true
     },
     {
-      id: 'relationshipGoals',
-      question: 'What are your relationship goals?',
-      type: 'select',
-      options: ['Long-term relationship', 'Marriage', 'Casual dating', 'Friendship first', 'Not sure yet'],
-      required: true
-    },
-    {
-      id: 'drinkingSmoking',
-      question: 'Do you drink or smoke?',
-      type: 'select',
-      options: ['I drink occasionally', 'I drink regularly', 'I smoke occasionally', 'I smoke regularly', 'I don\'t drink or smoke', 'I prefer not to say'],
-      required: true
-    },
-    {
-      id: 'availableDates',
-      question: 'Which dates work for you? (Select all that apply)',
+      id: 'goals',
+      question: 'What are you looking for?',
       type: 'multiSelect',
-      options: ['Weekday evenings', 'Weekend afternoons', 'Weekend evenings', 'Weekday lunches', 'Flexible schedule'],
+      options: ['Serious relationship', 'Casual dating', 'Friendship', 'Hookups', 'Marriage', 'Not sure yet'],
+      required: true
+    },
+    {
+      id: 'drinking',
+      question: 'Do you drink alcohol?',
+      type: 'select',
+      options: ['Yes, regularly', 'Yes, occasionally', 'No, I don\'t drink', 'I\'m sober'],
+      required: true
+    },
+    {
+      id: 'smoking',
+      question: 'Do you smoke?',
+      type: 'select',
+      options: ['Yes, cigarettes', 'Yes, vaping', 'Yes, marijuana', 'No, I don\'t smoke', 'I\'m trying to quit'],
+      required: true
+    },
+    {
+      id: 'dates',
+      question: 'What days are you typically available for dates?',
+      type: 'multiSelect',
+      options: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
       required: true,
       validation: (value: string[]) => {
-        if (!value || value.length === 0) return 'Please select at least one option';
+        if (!value || value.length === 0) return 'Please select at least one day';
         return null;
       }
     },
     {
-      id: 'selfDescription',
-      question: 'Give a brief description of yourself. Hobbies, work, etc.',
+      id: 'description',
+      question: 'Tell us about yourself',
       type: 'textarea',
-      placeholder: 'Tell us about yourself...',
+      placeholder: 'Share your interests, hobbies, what makes you unique...',
       required: true,
       validation: (value: string) => {
         if (!value.trim()) return 'Description is required';
@@ -244,9 +317,9 @@ const App: React.FC = () => {
     },
     {
       id: 'idealPartner',
-      question: 'Give a brief description of your ideal partner. Green flags? Deal breakers?',
+      question: 'Describe your ideal partner',
       type: 'textarea',
-      placeholder: 'Describe your ideal partner...',
+      placeholder: 'What qualities are you looking for in a partner?',
       required: true,
       validation: (value: string) => {
         if (!value.trim()) return 'Description is required';
@@ -256,13 +329,61 @@ const App: React.FC = () => {
       }
     },
     {
-      id: 'howDidYouFind',
-      question: 'How did you find out about this event?',
+      id: 'howFound',
+      question: 'How did you hear about us?',
       type: 'select',
-      options: ['Social media', 'Friend recommendation', 'Online search', 'Event website', 'Other'],
+      options: ['Social media', 'Friend recommendation', 'Online search', 'Event flyer', 'Other'],
       required: true
     }
   ];
+
+  // Lala Mode questions
+  const lalaQuestions = [
+    {
+      id: 'lalaDays',
+      question: 'Which days are you attending Lollapalooza 2025?',
+      type: 'multiSelect',
+      options: ['Thursday, August 7', 'Friday, August 8', 'Saturday, August 9', 'Sunday, August 10'],
+      required: true,
+      validation: (value: string[]) => {
+        if (!value || value.length === 0) return 'Please select at least one day';
+        return null;
+      }
+    }
+  ];
+
+  // Dynamically generate artist selection questions based on selected days
+  const generateArtistQuestions = () => {
+    const selectedDays = lalaAnswers.lalaDays || [];
+    const questions: any[] = [];
+
+    selectedDays.forEach((day: string) => {
+      const dayKey = day.toLowerCase().includes('thursday') ? 'thursday' :
+                    day.toLowerCase().includes('friday') ? 'friday' :
+                    day.toLowerCase().includes('saturday') ? 'saturday' : 'sunday';
+      
+      const daySchedule = lollapaloozaSchedule[dayKey as keyof typeof lollapaloozaSchedule];
+      
+      if (daySchedule) {
+        questions.push({
+          id: `artists_${dayKey}`,
+          question: `Which artists are you planning to see on ${day}?`,
+          type: 'multiSelect',
+          options: daySchedule.map(set => `${set.time} - ${set.artist}`),
+          required: true,
+          validation: (value: string[]) => {
+            if (!value || value.length === 0) return `Please select at least one artist for ${day}`;
+            return null;
+          }
+        });
+      }
+    });
+
+    return questions;
+  };
+
+  // Combine base questions with dynamic artist questions
+  const allLalaQuestions = [...lalaQuestions, ...generateArtistQuestions()];
 
   // Check for existing user session on app load
   useEffect(() => {
@@ -416,6 +537,72 @@ const App: React.FC = () => {
     return dates;
   };
 
+  // Lala Mode functions
+  const handleLalaMode = () => {
+    setIsLalaMode(true);
+    setLalaCurrentStep(0);
+    setLalaAnswers({});
+    setLalaErrors({});
+  };
+
+  const handleLalaAnswer = (questionId: string, answer: any) => {
+    setLalaAnswers(prev => ({ ...prev, [questionId]: answer }));
+    
+    // Clear error when user starts typing
+    setLalaErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors[questionId];
+      return newErrors;
+    });
+  };
+
+  const handleLalaNext = () => {
+    const currentLalaQuestion = allLalaQuestions[lalaCurrentStep];
+    if (!currentLalaQuestion) return;
+
+    const answer = lalaAnswers[currentLalaQuestion.id];
+    if (!answer || (Array.isArray(answer) && answer.length === 0)) {
+      setLalaErrors(prev => ({ 
+        ...prev, 
+        [currentLalaQuestion.id]: { 
+          field: currentLalaQuestion.id, 
+          message: 'This field is required' 
+        } 
+      }));
+      return;
+    }
+
+    if (lalaCurrentStep < allLalaQuestions.length - 1) {
+      setLalaCurrentStep(prev => prev + 1);
+    } else {
+      // Lala quiz completed
+      handleLalaSubmit();
+    }
+  };
+
+  const handleLalaPrevious = () => {
+    if (lalaCurrentStep > 0) {
+      setLalaCurrentStep(prev => prev - 1);
+      setLalaErrors({});
+    }
+  };
+
+  const handleLalaSubmit = () => {
+    console.log('Lala quiz submitted:', lalaAnswers);
+    alert('Lala quiz submitted! We\'ll match you with people seeing similar artists!');
+    setIsLalaMode(false);
+    setLalaCurrentStep(0);
+    setLalaAnswers({});
+    setLalaErrors({});
+  };
+
+  const handleBackToMain = () => {
+    setIsLalaMode(false);
+    setLalaCurrentStep(0);
+    setLalaAnswers({});
+    setLalaErrors({});
+  };
+
   const handlePhoneVerification = async () => {
     setIsPhoneVerifying(true);
     try {
@@ -564,16 +751,15 @@ const App: React.FC = () => {
     }
   };
 
+  // Current question
   const currentQuestion = questions[currentStep];
   const progress = ((currentStep + 1) / questions.length) * 100;
-  const currentError = errors[currentQuestion?.id];
-  
   const canProceed = currentQuestion && (
     currentQuestion.required ? 
     answers[currentQuestion.id] && 
     (Array.isArray(answers[currentQuestion.id]) ? answers[currentQuestion.id].length > 0 : true) :
     true
-  ) && !currentError;
+  ) && !errors[currentQuestion?.id];
 
   // Loading state
   if (false) { // isLoading was removed from new_code, so it's set to false.
@@ -807,6 +993,19 @@ const App: React.FC = () => {
             </p>
           </div>
 
+          {/* Lala Mode Button */}
+          <div className="mobile-card mb-8">
+            <button
+              onClick={handleLalaMode}
+              className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white py-4 rounded-xl font-semibold text-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-300 shadow-lg"
+            >
+              🎵 Lala Mode
+            </button>
+            <p className="text-xs text-gray-500 text-center mt-2">
+              Find your Lollapalooza 2025 festival match!
+            </p>
+          </div>
+
           {/* Your Answers */}
           <div className="mobile-card">
             <h2 className="text-2xl font-bold text-gray-800 mb-6">Your Profile</h2>
@@ -966,6 +1165,145 @@ const App: React.FC = () => {
         return null;
     }
   };
+
+  // Lala Mode Quiz Interface
+  if (isLalaMode) {
+    const currentLalaQuestion = allLalaQuestions[lalaCurrentStep];
+    const lalaProgress = ((lalaCurrentStep + 1) / allLalaQuestions.length) * 100;
+
+    const renderLalaQuestion = () => {
+      const question = currentLalaQuestion;
+      const answer = lalaAnswers[question.id];
+      const error = lalaErrors[question.id];
+
+      switch (question.type) {
+        case 'multiSelect':
+          const selectedOptions = Array.isArray(answer) ? answer : [];
+          return (
+            <div>
+              <div className="space-y-3">
+                {question.options?.map((option: string) => (
+                  <div
+                    key={option}
+                    className={`p-4 border-2 rounded-xl cursor-pointer transition-all ${
+                      selectedOptions.includes(option)
+                        ? 'border-green-500 bg-green-50'
+                        : 'border-gray-200 hover:border-green-300'
+                    }`}
+                    onClick={() => {
+                      const newSelection = selectedOptions.includes(option)
+                        ? selectedOptions.filter((o: string) => o !== option)
+                        : [...selectedOptions, option];
+                      handleLalaAnswer(question.id, newSelection);
+                    }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium">{option}</span>
+                      {selectedOptions.includes(option) && (
+                        <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                          <div className="w-2 h-2 bg-white rounded-full"></div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {error && (
+                <p className="text-red-500 text-sm mt-2">{error.message}</p>
+              )}
+            </div>
+          );
+        
+        default:
+          return null;
+      }
+    };
+
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 py-8 safe-area-top safe-area-bottom">
+        <div className="mobile-container">
+          {/* Header */}
+          <div className="mobile-card mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center space-x-4">
+                <img 
+                  src={user?.picture} 
+                  alt={user?.name}
+                  className="w-10 h-10 rounded-full"
+                />
+                <div>
+                  <h2 className="font-semibold text-gray-800">{user?.name}</h2>
+                  <p className="text-sm text-gray-600">{user?.email}</p>
+                </div>
+              </div>
+              <button
+                onClick={handleBackToMain}
+                className="text-gray-500 hover:text-gray-700 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-gray-800">
+                Lala Question {lalaCurrentStep + 1} of {allLalaQuestions.length}
+              </h2>
+              <span className="text-sm text-gray-600">
+                {Math.round(lalaProgress)}% Complete
+              </span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+              <div 
+                className="h-2 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full transition-all duration-500"
+                style={{ width: `${lalaProgress}%` }}
+              ></div>
+            </div>
+          </div>
+
+          {/* Question Card */}
+          <div className="mobile-card">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">
+              {currentLalaQuestion.question}
+            </h2>
+            {currentLalaQuestion.required && (
+              <p className="text-sm text-red-500 mb-4">* Required</p>
+            )}
+            
+            <div className="space-y-4">
+              {renderLalaQuestion()}
+            </div>
+
+            {/* Navigation */}
+            <div className="flex justify-between mt-8">
+              <button
+                onClick={handleLalaPrevious}
+                disabled={lalaCurrentStep === 0}
+                className={`px-6 py-3 rounded-xl font-medium transition-colors ${
+                  lalaCurrentStep === 0
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                Previous
+              </button>
+              
+              <button
+                onClick={handleLalaNext}
+                disabled={!lalaAnswers[currentLalaQuestion?.id] || !!lalaErrors[currentLalaQuestion?.id]}
+                className={`px-6 py-3 rounded-xl font-medium transition-colors ${
+                  !lalaAnswers[currentLalaQuestion?.id] || !!lalaErrors[currentLalaQuestion?.id]
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'bg-green-500 text-white hover:bg-green-600'
+                }`}
+              >
+                {lalaCurrentStep === allLalaQuestions.length - 1 ? 'Submit Lala Profile' : 'Next'}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-8 safe-area-top safe-area-bottom">
