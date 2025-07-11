@@ -352,83 +352,40 @@ const App: React.FC = () => {
     }
   ];
 
-  // Official Thursday artist list for Lala Mode
-  const thursdayArtists = [
-    "Nourished By Time",
-    "The Symposium",
-    "Silly Goose",
-    "Girl Tones",
-    "The Droptines",
-    "Jade Lemac",
-    "Ratboys",
-    "Julie",
-    "School of Rock",
-    "Alexsucks",
-    "Black Party",
-    "Chicago Made",
-    "Mark Ambor",
-    "Durand Bernarr",
-    "Michael & The Rockness Monsters",
-    "Yana",
-    "Sunami",
-    "Bo Staloch",
-    "FCUKERS",
-    "Half•Alive",
-    "Sierra Ferrell",
-    "Matt Champion",
-    "Glass Beams",
-    "Colby Acuff",
-    "Overmono",
-    "Role Model",
-    "CAGE THE ELEPHANT",
-    "Barry Can’t Swim",
-    "Justin Roberts & The Not Ready For Naptime Players",
-    "Magdalena Bay",
-    "Gracie Abrams",
-    "Royel Otis",
-    "Xaviersobased",
-    "2Hollis",
-    "Alex Warren",
-    "Xdinary Heroes",
-    "TYLER, THE CREATOR",
-    "LUKE COMBS"
-  ];
-
   // Dynamically generate artist selection questions based on selected days
   const generateArtistQuestions = () => {
     const selectedDays = lalaAnswers.lalaDays || [];
     const questions: any[] = [];
 
     selectedDays.forEach((day: string) => {
-      if (day.toLowerCase().includes('thursday')) {
+      let dayKey = '';
+      if (day.toLowerCase().includes('thursday')) dayKey = 'thursday';
+      else if (day.toLowerCase().includes('friday')) dayKey = 'friday';
+      else if (day.toLowerCase().includes('saturday')) dayKey = 'saturday';
+      else if (day.toLowerCase().includes('sunday')) dayKey = 'sunday';
+
+      const daySchedule = lollapaloozaSchedule[dayKey as keyof typeof lollapaloozaSchedule];
+      if (daySchedule) {
+        // Sort by time
+        const parseTime = (t: string) => {
+          const [time, ampm] = t.split(' ');
+          let [hour, minute] = time.split(':').map(Number);
+          if (ampm === 'PM' && hour !== 12) hour += 12;
+          if (ampm === 'AM' && hour === 12) hour = 0;
+          return hour * 60 + (minute || 0);
+        };
+        const sorted = [...daySchedule].sort((a, b) => parseTime(a.time) - parseTime(b.time));
         questions.push({
-          id: 'thursdayArtists',
-          question: 'Which artists are you most excited to see on Thursday?',
+          id: `artists_${dayKey}`,
+          question: `Which artists are you planning to see on ${day}?`,
           type: 'multiSelect',
-          options: thursdayArtists,
+          options: sorted.map(set => `${set.time} - ${set.artist}`),
           required: true,
           validation: (value: string[]) => {
-            if (!value || value.length === 0) return 'Please select at least one artist for Thursday';
+            if (!value || value.length === 0) return `Please select at least one artist for ${day}`;
             return null;
           }
         });
-      } else {
-        const dayKey = day.toLowerCase().includes('friday') ? 'friday' :
-                      day.toLowerCase().includes('saturday') ? 'saturday' : 'sunday';
-        const daySchedule = lollapaloozaSchedule[dayKey as keyof typeof lollapaloozaSchedule];
-        if (daySchedule) {
-          questions.push({
-            id: `artists_${dayKey}`,
-            question: `Which artists are you planning to see on ${day}?`,
-            type: 'multiSelect',
-            options: daySchedule.map(set => `${set.time} - ${set.artist}`),
-            required: true,
-            validation: (value: string[]) => {
-              if (!value || value.length === 0) return `Please select at least one artist for ${day}`;
-              return null;
-            }
-          });
-        }
       }
     });
 
