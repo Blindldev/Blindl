@@ -1002,14 +1002,7 @@ const App: React.FC = () => {
     if (!validateCurrentStep()) {
       return;
     }
-
-    // If this is the phone question and user hasn't verified their phone
-    if (questions[currentStep].id === 'phone' && !user?.phoneNumber) {
-      setPhoneNumber(answers.phone);
-      setPhoneVerificationStep('phone');
-      return;
-    }
-
+    // Prevent going out of bounds
     if (currentStep < questions.length - 1) {
       setCurrentStep(prev => prev + 1);
     } else {
@@ -1854,20 +1847,30 @@ const App: React.FC = () => {
     );
   }
 
+  // --- Defensive auto-advance useEffect ---
   useEffect(() => {
-    const currentQuestion = questions[currentStep];
     if (
-      currentQuestion &&
-      currentQuestion.type === 'select' &&
-      currentQuestion.id &&
-      answers[currentQuestion.id] &&
-      !errors[currentQuestion.id]
+      Array.isArray(questions) &&
+      currentStep >= 0 &&
+      currentStep < questions.length
     ) {
-      handleNext();
+      const currentQuestion = questions[currentStep];
+      if (
+        currentQuestion &&
+        currentQuestion.type === 'select' &&
+        currentQuestion.id &&
+        answers[currentQuestion.id] &&
+        !errors[currentQuestion.id]
+      ) {
+        // Only auto-advance if not at the last question
+        if (currentStep < questions.length - 1) {
+          handleNext();
+        }
+      }
     }
-    // Only run when the answer for the current question changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [questions, currentStep, answers, errors]);
+  // --- Defensive handleNext ---
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-8 safe-area-top safe-area-bottom">
