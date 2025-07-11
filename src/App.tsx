@@ -400,36 +400,37 @@ const App: React.FC = () => {
     const questions: any[] = [];
 
     selectedDays.forEach((day: string) => {
-      const dayKey = day.toLowerCase().includes('thursday') ? 'thursday' :
-                    day.toLowerCase().includes('friday') ? 'friday' :
-                    day.toLowerCase().includes('saturday') ? 'saturday' : 'sunday';
-      
-      const daySchedule = lollapaloozaSchedule[dayKey as keyof typeof lollapaloozaSchedule];
-      
-      if (daySchedule) {
+      if (day.toLowerCase().includes('thursday')) {
         questions.push({
-          id: `artists_${dayKey}`,
-          question: `Which artists are you planning to see on ${day}?`,
+          id: 'thursdayArtists',
+          question: 'Which artists are you most excited to see on Thursday?',
           type: 'multiSelect',
-          options: daySchedule.map(set => `${set.time} - ${set.artist}`),
+          options: thursdayArtists,
           required: true,
           validation: (value: string[]) => {
-            if (!value || value.length === 0) return `Please select at least one artist for ${day}`;
+            if (!value || value.length === 0) return 'Please select at least one artist for Thursday';
             return null;
           }
         });
+      } else {
+        const dayKey = day.toLowerCase().includes('friday') ? 'friday' :
+                      day.toLowerCase().includes('saturday') ? 'saturday' : 'sunday';
+        const daySchedule = lollapaloozaSchedule[dayKey as keyof typeof lollapaloozaSchedule];
+        if (daySchedule) {
+          questions.push({
+            id: `artists_${dayKey}`,
+            question: `Which artists are you planning to see on ${day}?`,
+            type: 'multiSelect',
+            options: daySchedule.map(set => `${set.time} - ${set.artist}`),
+            required: true,
+            validation: (value: string[]) => {
+              if (!value || value.length === 0) return `Please select at least one artist for ${day}`;
+              return null;
+            }
+          });
+        }
       }
     });
-
-    if (lalaAnswers.lalaDays && lalaAnswers.lalaDays.includes('Thursday, July 31')) {
-      questions.push({
-        id: 'thursdayArtists',
-        question: 'Which artists are you most excited to see on Thursday?',
-        type: 'multiSelect',
-        options: thursdayArtists,
-        required: true
-      });
-    }
 
     return questions;
   };
