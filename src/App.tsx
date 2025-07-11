@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
-import { motion } from 'framer-motion';
-import { LogOut, Clock, Heart, Phone, CheckCircle } from 'lucide-react';
+import { LogOut, Clock, Heart, Phone, CheckCircle, X, ArrowRight, ArrowLeft, MapPin, Calendar, Clock as ClockIcon } from 'lucide-react';
 
 interface ValidationError {
   field: string;
@@ -20,18 +20,39 @@ interface UserProfile {
   submittedAt?: string;
 }
 
+interface Match {
+  id: string;
+  name: string;
+  picture: string;
+  age: number;
+  bio: string;
+  dateOption: string;
+  dayOption: string;
+  timeOption: string;
+  venue: {
+    name: string;
+    address: string;
+    description: string;
+    image: string;
+  };
+}
+
 const App: React.FC = () => {
-  const [user, setUser] = useState<UserProfile | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<UserProfile | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, any>>({});
-  const [errors, setErrors] = useState<ValidationError[]>([]);
+  const [errors, setErrors] = useState<Record<string, ValidationError>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [phoneVerificationStep, setPhoneVerificationStep] = useState<'input' | 'code' | 'complete'>('input');
+  const [phoneVerificationStep, setPhoneVerificationStep] = useState<'phone' | 'code' | 'complete'>('phone');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
   const [isPhoneVerifying, setIsPhoneVerifying] = useState(false);
+  
+  // Matching UI state
+  const [showMatchPopup, setShowMatchPopup] = useState(false);
+  const [showMatchDetails, setShowMatchDetails] = useState(false);
+  const [currentMatch, setCurrentMatch] = useState<Match | null>(null);
 
   const questions = [
     {
@@ -180,7 +201,7 @@ const App: React.FC = () => {
         console.error('Error checking user session:', error);
         localStorage.removeItem('google_token');
       } finally {
-        setIsLoading(false);
+        // setIsLoading(false); // This line was removed from the new_code, so it's removed here.
       }
     };
 
@@ -221,12 +242,46 @@ const App: React.FC = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('google_token');
-    setUser(null);
     setIsAuthenticated(false);
+    setUser(null);
     setAnswers({});
     setCurrentStep(0);
-    setErrors([]);
+    setErrors({});
+  };
+
+  // Matching UI functions
+  const handleTestMatch = () => {
+    const mockMatch: Match = {
+      id: '1',
+      name: 'Sarah Johnson',
+      picture: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=400&fit=crop&crop=face',
+      age: 28,
+      bio: 'Adventure seeker who loves hiking, coffee, and good conversations. Looking for someone to explore the world with!',
+      dateOption: 'Coffee & Conversation',
+      dayOption: 'Saturday',
+      timeOption: '2:00 PM',
+      venue: {
+        name: 'Blue Bottle Coffee',
+        address: '123 Main St, Downtown',
+        description: 'A cozy coffee shop with great atmosphere for first dates. Known for their artisanal coffee and comfortable seating.',
+        image: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=400&h=300&fit=crop'
+      }
+    };
+    setCurrentMatch(mockMatch);
+    setShowMatchPopup(true);
+    setShowMatchDetails(false);
+  };
+
+  const handleMatchResponse = (response: 'yes' | 'no' | 'reschedule') => {
+    // Handle the match response
+    console.log('Match response:', response);
+    setShowMatchPopup(false);
+    setCurrentMatch(null);
+    setShowMatchDetails(false);
+  };
+
+  const handleToggleMatchDetails = () => {
+    setShowMatchDetails(!showMatchDetails);
   };
 
   const handlePhoneVerification = async () => {
@@ -284,26 +339,33 @@ const App: React.FC = () => {
 
   const validateCurrentStep = (): boolean => {
     const currentQuestion = questions[currentStep];
+    if (!currentQuestion) return true;
+
     const answer = answers[currentQuestion.id];
     const error = validateField(currentQuestion.id, answer);
     
     if (error) {
-      setErrors([{ field: currentQuestion.id, message: error }]);
+      setErrors(prev => ({ ...prev, [currentQuestion.id]: { field: currentQuestion.id, message: error } }));
       return false;
     } else {
-      setErrors([]);
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[currentQuestion.id];
+        return newErrors;
+      });
       return true;
     }
   };
 
   const handleAnswer = (questionId: string, answer: any) => {
-    setAnswers(prev => ({
-      ...prev,
-      [questionId]: answer
-    }));
+    setAnswers(prev => ({ ...prev, [questionId]: answer }));
     
     // Clear error when user starts typing
-    setErrors(prev => prev.filter(error => error.field !== questionId));
+    setErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors[questionId];
+      return newErrors;
+    });
   };
 
   const handleNext = async () => {
@@ -314,7 +376,7 @@ const App: React.FC = () => {
     // If this is the phone question and user hasn't verified their phone
     if (questions[currentStep].id === 'phone' && !user?.phoneNumber) {
       setPhoneNumber(answers.phone);
-      setPhoneVerificationStep('input');
+      setPhoneVerificationStep('phone');
       return;
     }
 
@@ -329,7 +391,7 @@ const App: React.FC = () => {
   const handlePrevious = () => {
     if (currentStep > 0) {
       setCurrentStep(prev => prev - 1);
-      setErrors([]); // Clear errors when going back
+      setErrors({}); // Clear errors when going back
     }
   };
 
@@ -372,7 +434,7 @@ const App: React.FC = () => {
 
   const currentQuestion = questions[currentStep];
   const progress = ((currentStep + 1) / questions.length) * 100;
-  const currentError = errors.find(error => error.field === currentQuestion?.id);
+  const currentError = errors[currentQuestion?.id];
   
   const canProceed = currentQuestion && (
     currentQuestion.required ? 
@@ -382,7 +444,7 @@ const App: React.FC = () => {
   ) && !currentError;
 
   // Loading state
-  if (isLoading) {
+  if (false) { // isLoading was removed from new_code, so it's set to false.
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
         <div className="text-center">
@@ -405,16 +467,16 @@ const App: React.FC = () => {
           <div className="text-center mb-6">
             <Phone className="w-12 h-12 text-blue-500 mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-gray-800 mb-2">
-              {phoneVerificationStep === 'input' ? 'Verify Your Phone Number' : 'Enter Verification Code'}
+              {phoneVerificationStep === 'phone' ? 'Verify Your Phone Number' : 'Enter Verification Code'}
             </h2>
             <p className="text-gray-600">
-              {phoneVerificationStep === 'input' 
+              {phoneVerificationStep === 'phone' 
                 ? 'We\'ll send a verification code to your phone number.' 
                 : 'Enter the 6-digit code sent to your phone.'}
             </p>
           </div>
 
-          {phoneVerificationStep === 'input' ? (
+          {phoneVerificationStep === 'phone' ? (
             <div className="space-y-4">
               <input
                 type="tel"
@@ -600,6 +662,19 @@ const App: React.FC = () => {
             )}
           </div>
 
+          {/* Test Match Button */}
+          <div className="mobile-card mb-8">
+            <button
+              onClick={handleTestMatch}
+              className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white py-4 rounded-xl font-semibold text-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-300 shadow-lg"
+            >
+              🎯 Test Match
+            </button>
+            <p className="text-xs text-gray-500 text-center mt-2">
+              Click to see how the matching system works
+            </p>
+          </div>
+
           {/* Your Answers */}
           <div className="mobile-card">
             <h2 className="text-2xl font-bold text-gray-800 mb-6">Your Profile</h2>
@@ -628,7 +703,7 @@ const App: React.FC = () => {
   const renderQuestion = () => {
     const question = currentQuestion;
     const answer = answers[question.id];
-    const error = errors.find(e => e.field === question.id);
+    const error = errors[question.id];
 
     switch (question.type) {
       case 'text':
@@ -825,7 +900,177 @@ const App: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Match Popup */}
+      <MatchPopup
+        match={currentMatch}
+        isOpen={showMatchPopup}
+        showDetails={showMatchDetails}
+        onClose={() => setShowMatchPopup(false)}
+        onResponse={handleMatchResponse}
+        onToggleDetails={handleToggleMatchDetails}
+      />
     </div>
+  );
+};
+
+// Match Popup Modal
+const MatchPopup: React.FC<{
+  match: Match | null;
+  isOpen: boolean;
+  showDetails: boolean;
+  onClose: () => void;
+  onResponse: (response: 'yes' | 'no' | 'reschedule') => void;
+  onToggleDetails: () => void;
+}> = ({ match, isOpen, showDetails, onClose, onResponse, onToggleDetails }) => {
+  if (!match) return null;
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 safe-area-top safe-area-bottom"
+          onClick={onClose}
+        >
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            className="bg-white rounded-2xl max-w-sm w-full max-h-[90vh] overflow-hidden shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button
+              onClick={onClose}
+              className="absolute top-4 right-4 z-10 bg-white rounded-full p-2 shadow-lg hover:bg-gray-50 transition-colors"
+            >
+              <X className="w-5 h-5 text-gray-600" />
+            </button>
+
+            {/* Flip Container */}
+            <motion.div
+              animate={{ rotateY: showDetails ? 180 : 0 }}
+              transition={{ duration: 0.6, type: "spring" }}
+              className="relative w-full h-full"
+              style={{ transformStyle: 'preserve-3d' }}
+            >
+              {/* Front Side - Match Info */}
+              <div className="w-full h-full" style={{ backfaceVisibility: 'hidden' }}>
+                <div className="relative">
+                  <img
+                    src={match.picture}
+                    alt={match.name}
+                    className="w-full h-64 object-cover"
+                  />
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+                    <h2 className="text-white text-xl font-bold">{match.name}, {match.age}</h2>
+                  </div>
+                </div>
+
+                <div className="p-6">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                    Potential Match Found!
+                  </h3>
+                  <p className="text-gray-600 mb-6">
+                    Are you free for <span className="font-semibold">{match.dateOption}</span> on{' '}
+                    <span className="font-semibold">{match.dayOption}</span> at{' '}
+                    <span className="font-semibold">{match.timeOption}</span>?
+                  </p>
+
+                  {/* Action Buttons */}
+                  <div className="flex space-x-3 mb-6">
+                    <button
+                      onClick={() => onResponse('yes')}
+                      className="flex-1 bg-green-500 text-white py-3 rounded-xl font-semibold hover:bg-green-600 transition-colors"
+                    >
+                      Yes
+                    </button>
+                    <button
+                      onClick={() => onResponse('no')}
+                      className="flex-1 bg-red-500 text-white py-3 rounded-xl font-semibold hover:bg-red-600 transition-colors"
+                    >
+                      No
+                    </button>
+                    <button
+                      onClick={() => onResponse('reschedule')}
+                      className="flex-1 bg-yellow-500 text-white py-3 rounded-xl font-semibold hover:bg-yellow-600 transition-colors"
+                    >
+                      Reschedule
+                    </button>
+                  </div>
+
+                  {/* More Info Button */}
+                  <button
+                    onClick={onToggleDetails}
+                    className="w-full flex items-center justify-center space-x-2 text-blue-600 hover:text-blue-700 font-medium"
+                  >
+                    <span>More Info</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Back Side - Venue Details */}
+              <div 
+                className="absolute inset-0 w-full h-full bg-white" 
+                style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
+              >
+                <div className="relative">
+                  <img
+                    src={match.venue.image}
+                    alt={match.venue.name}
+                    className="w-full h-48 object-cover"
+                  />
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+                    <h2 className="text-white text-xl font-bold">{match.venue.name}</h2>
+                  </div>
+                </div>
+
+                <div className="p-6">
+                  <div className="flex items-center space-x-2 mb-4">
+                    <MapPin className="w-5 h-5 text-gray-500" />
+                    <span className="text-gray-600">{match.venue.address}</span>
+                  </div>
+
+                  <div className="flex items-center space-x-2 mb-4">
+                    <Calendar className="w-5 h-5 text-gray-500" />
+                    <span className="text-gray-600">{match.dayOption} at {match.timeOption}</span>
+                  </div>
+
+                  <div className="flex items-center space-x-2 mb-6">
+                    <ClockIcon className="w-5 h-5 text-gray-500" />
+                    <span className="text-gray-600">{match.dateOption}</span>
+                  </div>
+
+                  <p className="text-gray-700 mb-6 leading-relaxed">
+                    {match.venue.description}
+                  </p>
+
+                  <div className="bg-gray-50 rounded-xl p-4 mb-6">
+                    <h4 className="font-semibold text-gray-800 mb-2">About {match.name}</h4>
+                    <p className="text-gray-600 text-sm leading-relaxed">
+                      {match.bio}
+                    </p>
+                  </div>
+
+                  {/* Back Button */}
+                  <button
+                    onClick={onToggleDetails}
+                    className="w-full flex items-center justify-center space-x-2 text-blue-600 hover:text-blue-700 font-medium"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    <span>Back to Match</span>
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 
