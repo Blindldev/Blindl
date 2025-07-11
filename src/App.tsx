@@ -1746,12 +1746,7 @@ const App: React.FC = () => {
                       ? 'border-blue-500 bg-blue-50' 
                       : 'border-gray-200 hover:border-blue-300'
                   }`}
-                  onClick={() => {
-                    handleAnswer(question.id, option);
-                    setTimeout(() => {
-                      handleNext();
-                    }, 0);
-                  }}
+                  onClick={() => handleAnswer(question.id, option)}
                 >
                   <span className="font-medium">{option}</span>
                 </div>
@@ -1865,6 +1860,20 @@ const App: React.FC = () => {
       </div>
     );
   }
+
+  useEffect(() => {
+    const currentQuestion = questions[currentStep];
+    if (
+      currentQuestion &&
+      currentQuestion.type === 'select' &&
+      answers[currentQuestion.id] &&
+      !errors[currentQuestion.id]
+    ) {
+      handleNext();
+    }
+    // Only run when the answer for the current question changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [answers[questions[currentStep]?.id]]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-8 safe-area-top safe-area-bottom">
