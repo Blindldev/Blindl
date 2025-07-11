@@ -251,6 +251,7 @@ const App: React.FC = () => {
 
   // Matching UI functions
   const handleTestMatch = () => {
+    console.log('Test Match button clicked!');
     const mockMatch: Match = {
       id: '1',
       name: 'Sarah Johnson',
@@ -267,9 +268,11 @@ const App: React.FC = () => {
         image: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=400&h=300&fit=crop'
       }
     };
+    console.log('Setting match data:', mockMatch);
     setCurrentMatch(mockMatch);
     setShowMatchPopup(true);
     setShowMatchDetails(false);
+    console.log('Match popup should now be visible');
   };
 
   const handleMatchResponse = (response: 'yes' | 'no' | 'reschedule') => {
@@ -933,6 +936,8 @@ const MatchPopup: React.FC<{
   onResponse: (response: 'yes' | 'no' | 'reschedule') => void;
   onToggleDetails: () => void;
 }> = ({ match, isOpen, showDetails, onClose, onResponse, onToggleDetails }) => {
+  console.log('MatchPopup render:', { match: !!match, isOpen, showDetails });
+  
   if (!match) return null;
 
   return (
