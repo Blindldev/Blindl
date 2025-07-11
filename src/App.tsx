@@ -985,13 +985,7 @@ const App: React.FC = () => {
       delete newErrors[questionId];
       return newErrors;
     });
-    // Auto-advance for single select questions (not multi-select, text, textarea, etc.)
-    const currentQuestion = questions[currentStep];
-    if (currentQuestion && currentQuestion.id === questionId && currentQuestion.type === 'select' && answer && answer !== '') {
-      setTimeout(() => {
-        handleNext();
-      }, 100);
-    }
+    // No auto-advance logic here
   };
 
   const handleNext = async () => {
