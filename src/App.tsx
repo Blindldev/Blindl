@@ -395,7 +395,7 @@ const App: React.FC = () => {
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [errors, setErrors] = useState<Record<string, ValidationError>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [phoneVerificationStep, setPhoneVerificationStep] = useState<'phone' | 'code' | 'complete'>('phone');
+  const [phoneVerificationStep, setPhoneVerificationStep] = useState<'phone' | 'code' | 'complete'>('complete');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
   const [isPhoneVerifying, setIsPhoneVerifying] = useState(false);
