@@ -1527,12 +1527,17 @@ const App: React.FC = () => {
                 const question = questions.find(q => q.id === key);
                 if (!question) return null;
                 const isEditing = editingField === key;
+                const isEditable = question.type !== 'email' && question.type !== 'tel';
                 return (
                   <div key={key} className="border border-gray-200 rounded-xl p-4 flex items-center justify-between mb-2">
                     <div className="flex-1">
                       <h3 className="font-semibold text-gray-800 mb-2">{question.question}</h3>
                       {isEditing ? (
                         renderProfileEditInput(question, editingValue, setEditingValue)
+                      ) : question.type === 'textarea' ? (
+                        <div className="w-full max-w-full bg-gray-50 border border-gray-100 rounded-lg p-3 text-sm text-gray-700 whitespace-pre-wrap overflow-x-auto" style={{ fontFamily: 'inherit', minHeight: '3.5rem', maxHeight: '12rem' }}>
+                          {value}
+                        </div>
                       ) : (
                         <p className="text-gray-600">{Array.isArray(value) ? value.join(', ') : value}</p>
                       )}
@@ -1557,13 +1562,15 @@ const App: React.FC = () => {
                           >Cancel</button>
                         </>
                       ) : (
-                        <button
-                          className="text-blue-500 hover:text-blue-700"
-                          onClick={() => { setEditingField(key); setEditingValue(value); }}
-                          aria-label={`Edit ${question.question}`}
-                        >
-                          ✎
-                        </button>
+                        isEditable && (
+                          <button
+                            className="text-blue-500 hover:text-blue-700"
+                            onClick={() => { setEditingField(key); setEditingValue(value); }}
+                            aria-label={`Edit ${question.question}`}
+                          >
+                            ✎
+                          </button>
+                        )
                       )}
                     </div>
                   </div>
