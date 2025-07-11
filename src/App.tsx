@@ -452,11 +452,6 @@ const App: React.FC = () => {
       }
     },
     {
-      id: 'email',
-      question: 'What is your email address?',
-      type: 'email',
-      placeholder: 'Enter your email',
-      required: true
     },
     {
       id: 'phone',
