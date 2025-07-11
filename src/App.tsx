@@ -695,6 +695,16 @@ const App: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Match Popup */}
+        <MatchPopup
+          match={currentMatch}
+          isOpen={showMatchPopup}
+          showDetails={showMatchDetails}
+          onClose={() => setShowMatchPopup(false)}
+          onResponse={handleMatchResponse}
+          onToggleDetails={handleToggleMatchDetails}
+        />
       </div>
     );
   }
