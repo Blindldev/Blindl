@@ -53,6 +53,91 @@ const App: React.FC = () => {
   const [showMatchPopup, setShowMatchPopup] = useState(false);
   const [showMatchDetails, setShowMatchDetails] = useState(false);
   const [currentMatch, setCurrentMatch] = useState<Match | null>(null);
+  const [matchIndex, setMatchIndex] = useState(0);
+
+  // Dummy matches with different women's images
+  const dummyMatches: Match[] = [
+    {
+      id: '1',
+      name: 'Emma Rodriguez',
+      picture: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=400&fit=crop&crop=face',
+      age: 26,
+      bio: 'Passionate yoga instructor and coffee enthusiast. I love exploring new restaurants, hiking on weekends, and having deep conversations about life, travel, and dreams. Looking for someone who values authenticity and adventure!',
+      dateOption: 'Coffee & Conversation',
+      dayOption: 'Saturday',
+      timeOption: '2:00 PM',
+      venue: {
+        name: 'Blue Bottle Coffee',
+        address: '123 Main St, Downtown',
+        description: 'A cozy coffee shop with great atmosphere for first dates. Known for their artisanal coffee and comfortable seating.',
+        image: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=400&h=300&fit=crop'
+      }
+    },
+    {
+      id: '2',
+      name: 'Sophie Chen',
+      picture: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face',
+      age: 24,
+      bio: 'Creative graphic designer who loves art galleries, indie music, and trying new cuisines. I enjoy photography, weekend road trips, and meaningful conversations. Seeking someone who appreciates creativity and has a sense of humor!',
+      dateOption: 'Art Gallery Walk',
+      dayOption: 'Sunday',
+      timeOption: '3:30 PM',
+      venue: {
+        name: 'Modern Art Gallery',
+        address: '456 Art District Blvd',
+        description: 'A contemporary art space featuring local and international artists. Perfect for cultural conversations and inspiration.',
+        image: 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=400&h=300&fit=crop'
+      }
+    },
+    {
+      id: '3',
+      name: 'Isabella Thompson',
+      picture: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=400&fit=crop&crop=face',
+      age: 28,
+      bio: 'Environmental scientist and nature lover. I spend my free time hiking, reading sci-fi novels, and volunteering at animal shelters. Looking for someone who cares about the planet and enjoys outdoor adventures!',
+      dateOption: 'Nature Walk & Picnic',
+      dayOption: 'Saturday',
+      timeOption: '11:00 AM',
+      venue: {
+        name: 'Central Park Gardens',
+        address: '789 Nature Trail Rd',
+        description: 'Beautiful botanical gardens with walking trails, perfect for a peaceful outdoor date surrounded by nature.',
+        image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=300&fit=crop'
+      }
+    },
+    {
+      id: '4',
+      name: 'Maya Patel',
+      picture: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=400&fit=crop&crop=face',
+      age: 25,
+      bio: 'Software engineer by day, amateur chef by night. I love cooking, board games, and watching documentaries. Passionate about technology and always eager to learn new things. Seeking someone who enjoys good food and intellectual conversations!',
+      dateOption: 'Cooking Class',
+      dayOption: 'Friday',
+      timeOption: '6:00 PM',
+      venue: {
+        name: 'Culinary Institute',
+        address: '321 Chef Street',
+        description: 'Professional cooking school offering hands-on classes. Learn to cook together while getting to know each other!',
+        image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=300&fit=crop'
+      }
+    },
+    {
+      id: '5',
+      name: 'Ava Williams',
+      picture: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face',
+      age: 27,
+      bio: 'Marketing consultant and fitness enthusiast. I love trying new workout classes, traveling to new cities, and discovering hidden gem restaurants. Looking for someone who values health, adventure, and good conversation!',
+      dateOption: 'Sunset Beach Walk',
+      dayOption: 'Sunday',
+      timeOption: '7:00 PM',
+      venue: {
+        name: 'Oceanfront Boardwalk',
+        address: '567 Coastal Highway',
+        description: 'Scenic beachfront promenade perfect for romantic sunset walks and ocean views.',
+        image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=300&fit=crop'
+      }
+    }
+  ];
 
   const questions = [
     {
@@ -252,26 +337,11 @@ const App: React.FC = () => {
   // Matching UI functions
   const handleTestMatch = () => {
     console.log('Test Match button clicked!');
-    const mockMatch: Match = {
-      id: '1',
-      name: 'Sarah Johnson',
-      picture: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=400&fit=crop&crop=face',
-      age: 28,
-      bio: 'Adventure seeker who loves hiking, coffee, and good conversations. Looking for someone to explore the world with!',
-      dateOption: 'Coffee & Conversation',
-      dayOption: 'Saturday',
-      timeOption: '2:00 PM',
-      venue: {
-        name: 'Blue Bottle Coffee',
-        address: '123 Main St, Downtown',
-        description: 'A cozy coffee shop with great atmosphere for first dates. Known for their artisanal coffee and comfortable seating.',
-        image: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=400&h=300&fit=crop'
-      }
-    };
-    console.log('Setting match data:', mockMatch);
-    setCurrentMatch(mockMatch);
+    const nextMatch = dummyMatches[matchIndex];
+    setCurrentMatch(nextMatch);
     setShowMatchPopup(true);
     setShowMatchDetails(false);
+    setMatchIndex((prev) => (prev + 1) % dummyMatches.length);
     console.log('Match popup should now be visible');
   };
 
@@ -671,10 +741,10 @@ const App: React.FC = () => {
               onClick={handleTestMatch}
               className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white py-4 rounded-xl font-semibold text-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-300 shadow-lg"
             >
-              🎯 Test Match
+              🎯 Test Match #{matchIndex + 1}
             </button>
             <p className="text-xs text-gray-500 text-center mt-2">
-              Click to see how the matching system works
+              Click to see different match scenarios ({matchIndex + 1} of {dummyMatches.length})
             </p>
           </div>
 
