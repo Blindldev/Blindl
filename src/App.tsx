@@ -992,11 +992,11 @@ const App: React.FC = () => {
 
     // Auto-advance for single select questions (not multi-select, text, textarea, etc.)
     const currentQuestion = questions[currentStep];
-    if (currentQuestion && currentQuestion.id === questionId && currentQuestion.type === 'select' && answer) {
-      // Small delay to allow the UI to update
+    if (currentQuestion && currentQuestion.id === questionId && currentQuestion.type === 'select' && answer && answer !== '') {
+      // Use a longer delay to ensure state has updated
       setTimeout(() => {
         handleNext();
-      }, 300);
+      }, 100);
     }
   };
 
