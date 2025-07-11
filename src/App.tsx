@@ -1194,50 +1194,7 @@ const App: React.FC = () => {
                     <div className="flex-1">
                       <h3 className="font-semibold text-gray-800 mb-2">{question.question}</h3>
                       {isEditing ? (
-                        question.type === 'multiSelect' ? (
-                          <div className="space-y-2">
-                            {question.options?.map((option: string) => (
-                              <div
-                                key={option}
-                                className={`p-2 border rounded cursor-pointer ${Array.isArray(editingValue) && editingValue.includes(option) ? 'bg-blue-100 border-blue-400' : 'bg-white border-gray-200'}`}
-                                onClick={() => {
-                                  let newVal = Array.isArray(editingValue) ? [...editingValue] : [];
-                                  if (newVal.includes(option)) newVal = newVal.filter((o: string) => o !== option);
-                                  else newVal.push(option);
-                                  setEditingValue(newVal);
-                                }}
-                              >
-                                <span>{option}</span>
-                                {Array.isArray(editingValue) && editingValue.includes(option) && <span className="ml-2 text-blue-600">✓</span>}
-                              </div>
-                            ))}
-                          </div>
-                        ) : question.type === 'select' ? (
-                          <select
-                            className="w-full border rounded p-2"
-                            value={editingValue}
-                            onChange={e => setEditingValue(e.target.value)}
-                          >
-                            <option value="">Select...</option>
-                            {question.options?.map((option: string) => (
-                              <option key={option} value={option}>{option}</option>
-                            ))}
-                          </select>
-                        ) : question.type === 'textarea' ? (
-                          <textarea
-                            className="w-full border rounded p-2"
-                            value={editingValue}
-                            onChange={e => setEditingValue(e.target.value)}
-                            rows={3}
-                          />
-                        ) : (
-                          <input
-                            className="w-full border rounded p-2"
-                            type={question.type}
-                            value={editingValue}
-                            onChange={e => setEditingValue(e.target.value)}
-                          />
-                        )
+                        renderProfileEditInput(question, editingValue, setEditingValue)
                       ) : (
                         <p className="text-gray-600">{Array.isArray(value) ? value.join(', ') : value}</p>
                       )}
@@ -1946,5 +1903,61 @@ const RescheduleModal: React.FC<{
     </AnimatePresence>
   );
 };
+
+// Helper to render the correct input for editing a profile answer
+function renderProfileEditInput(question: any, editingValue: any, setEditingValue: (v: any) => void) {
+  if (question.type === 'multiSelect') {
+    return (
+      <div className="space-y-2">
+        {question.options?.map((option: string) => (
+          <div
+            key={option}
+            className={`p-2 border rounded cursor-pointer ${Array.isArray(editingValue) && editingValue.includes(option) ? 'bg-blue-100 border-blue-400' : 'bg-white border-gray-200'}`}
+            onClick={() => {
+              let newVal = Array.isArray(editingValue) ? [...editingValue] : [];
+              if (newVal.includes(option)) newVal = newVal.filter((o: string) => o !== option);
+              else newVal.push(option);
+              setEditingValue(newVal);
+            }}
+          >
+            <span>{option}</span>
+            {Array.isArray(editingValue) && editingValue.includes(option) && <span className="ml-2 text-blue-600">✓</span>}
+          </div>
+        ))}
+      </div>
+    );
+  } else if (question.type === 'select') {
+    return (
+      <select
+        className="w-full border rounded p-2"
+        value={editingValue}
+        onChange={e => setEditingValue(e.target.value)}
+      >
+        <option value="">Select...</option>
+        {question.options?.map((option: string) => (
+          <option key={option} value={option}>{option}</option>
+        ))}
+      </select>
+    );
+  } else if (question.type === 'textarea') {
+    return (
+      <textarea
+        className="w-full border rounded p-2"
+        value={editingValue}
+        onChange={e => setEditingValue(e.target.value)}
+        rows={3}
+      />
+    );
+  } else {
+    return (
+      <input
+        className="w-full border rounded p-2"
+        type={question.type}
+        value={editingValue}
+        onChange={e => setEditingValue(e.target.value)}
+      />
+    );
+  }
+}
 
 export default App;
