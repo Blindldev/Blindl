@@ -352,6 +352,48 @@ const App: React.FC = () => {
     }
   ];
 
+  // Official Thursday artist list for Lala Mode
+  const thursdayArtists = [
+    "Nourished By Time",
+    "The Symposium",
+    "Silly Goose",
+    "Girl Tones",
+    "The Droptines",
+    "Jade Lemac",
+    "Ratboys",
+    "Julie",
+    "School of Rock",
+    "Alexsucks",
+    "Black Party",
+    "Chicago Made",
+    "Mark Ambor",
+    "Durand Bernarr",
+    "Michael & The Rockness Monsters",
+    "Yana",
+    "Sunami",
+    "Bo Staloch",
+    "FCUKERS",
+    "Half•Alive",
+    "Sierra Ferrell",
+    "Matt Champion",
+    "Glass Beams",
+    "Colby Acuff",
+    "Overmono",
+    "Role Model",
+    "CAGE THE ELEPHANT",
+    "Barry Can’t Swim",
+    "Justin Roberts & The Not Ready For Naptime Players",
+    "Magdalena Bay",
+    "Gracie Abrams",
+    "Royel Otis",
+    "Xaviersobased",
+    "2Hollis",
+    "Alex Warren",
+    "Xdinary Heroes",
+    "TYLER, THE CREATOR",
+    "LUKE COMBS"
+  ];
+
   // Dynamically generate artist selection questions based on selected days
   const generateArtistQuestions = () => {
     const selectedDays = lalaAnswers.lalaDays || [];
@@ -378,6 +420,16 @@ const App: React.FC = () => {
         });
       }
     });
+
+    if (lalaAnswers.lalaDays && lalaAnswers.lalaDays.includes('Thursday, July 31')) {
+      questions.push({
+        id: 'thursdayArtists',
+        question: 'Which artists are you most excited to see on Thursday?',
+        type: 'multiSelect',
+        options: thursdayArtists,
+        required: true
+      });
+    }
 
     return questions;
   };
