@@ -656,12 +656,144 @@ const App: React.FC = () => {
 
   // Questions array
   const questions: any[] = [
-    // ... all question objects ...
+    {
+      id: 'gender',
+      question: 'What is your gender?',
+      type: 'select',
+      options: ['Male', 'Female', 'Non-binary', 'Prefer not to say'],
+      required: true
+    },
+    {
+      id: 'name',
+      question: 'What is your name?',
+      type: 'text',
+      placeholder: 'Enter your full name',
+      required: true
+    },
+    {
+      id: 'age',
+      question: 'How old are you?',
+      type: 'number',
+      placeholder: 'Enter your age',
+      required: true,
+      validation: (value: string) => {
+        const age = parseInt(value);
+        if (!value) return 'Age is required';
+        if (isNaN(age)) return 'Please enter a valid number';
+        if (age < 18) return 'You must be at least 18 years old';
+        if (age > 99) return 'Please enter a valid age (18-99)';
+        return null;
+      }
+    },
+    {
+      id: 'email',
+      question: 'What is your email address?',
+      type: 'email',
+      placeholder: 'Enter your email',
+      required: true
+    },
+    {
+      id: 'phone',
+      question: 'What is your phone number?',
+      type: 'tel',
+      placeholder: '+1 (555) 123-4567',
+      required: true,
+      validation: (value: string) => {
+        if (!value) return 'Phone number is required';
+        const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+        if (!phoneRegex.test(value.replace(/[\s\-\(\)]/g, ''))) {
+          return 'Please enter a valid phone number';
+        }
+        return null;
+      }
+    },
+    {
+      id: 'orientation',
+      question: 'What is your sexual orientation?',
+      type: 'select',
+      options: ['Straight', 'Gay', 'Lesbian', 'Bisexual', 'Pansexual', 'Asexual', 'Other'],
+      required: true
+    },
+    {
+      id: 'goals',
+      question: 'What are you looking for?',
+      type: 'multiSelect',
+      options: ['Serious relationship', 'Casual dating', 'Friendship', 'Hookups', 'Marriage', 'Not sure yet'],
+      required: true
+    },
+    {
+      id: 'drinking',
+      question: 'Do you drink alcohol?',
+      type: 'select',
+      options: ['Yes, regularly', 'Yes, occasionally', 'No, I don\'t drink', 'I\'m sober'],
+      required: true
+    },
+    {
+      id: 'smoking',
+      question: 'Do you smoke?',
+      type: 'select',
+      options: ['Yes, cigarettes', 'Yes, vaping', 'Yes, marijuana', 'No, I don\'t smoke', 'I\'m trying to quit'],
+      required: true
+    },
+    {
+      id: 'dates',
+      question: 'What days are you typically available for dates?',
+      type: 'multiSelect',
+      options: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+      required: true,
+      validation: (value: string[]) => {
+        if (!value || value.length === 0) return 'Please select at least one day';
+        return null;
+      }
+    },
+    {
+      id: 'description',
+      question: 'Tell us about yourself',
+      type: 'textarea',
+      placeholder: 'Share your interests, hobbies, what makes you unique...',
+      required: true,
+      validation: (value: string) => {
+        if (!value.trim()) return 'Description is required';
+        if (value.trim().length < 10) return 'Description must be at least 10 characters';
+        if (value.trim().length > 500) return 'Description must be less than 500 characters';
+        return null;
+      }
+    },
+    {
+      id: 'idealPartner',
+      question: 'Describe your ideal partner',
+      type: 'textarea',
+      placeholder: 'What qualities are you looking for in a partner?',
+      required: true,
+      validation: (value: string) => {
+        if (!value.trim()) return 'Description is required';
+        if (value.trim().length < 10) return 'Description must be at least 10 characters';
+        if (value.trim().length > 500) return 'Description must be less than 500 characters';
+        return null;
+      }
+    },
+    {
+      id: 'howFound',
+      question: 'How did you hear about us?',
+      type: 'select',
+      options: ['Social media', 'Friend recommendation', 'Online search', 'Event flyer', 'Other'],
+      required: true
+    }
   ];
 
   // Lala Mode questions
   const lalaQuestions: any[] = [
-    // ... lala question objects ...
+    {
+      id: 'lalaDays',
+      question: 'Which days are you attending Lollapalooza 2025?',
+      type: 'multiSelect',
+      options: ['Thursday, August 7', 'Friday, August 8', 'Saturday, August 9', 'Sunday, August 10'],
+      required: true,
+      validation: (value: string[]) => {
+        if (!value || value.length === 0) return 'Please select at least one day';
+        return null;
+      }
+    }
   ];
 
   // Dynamically generate artist selection questions based on selected days
