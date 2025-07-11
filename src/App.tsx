@@ -437,6 +437,19 @@ const App: React.FC = () => {
   // Combine base questions with dynamic artist questions
   const allLalaQuestions = [...lalaQuestions, ...generateArtistQuestions()];
 
+  // Lala Mode profile state (must be at top level)
+  const lalaKey = user ? `lala_${user.email}` : null;
+  const [lalaProfile, setLalaProfile] = useState<Record<string, any> | null>(null);
+  useEffect(() => {
+    if (lalaKey) {
+      const lalaData = localStorage.getItem(lalaKey);
+      if (lalaData) setLalaProfile(JSON.parse(lalaData));
+      else setLalaProfile(null);
+    } else {
+      setLalaProfile(null);
+    }
+  }, [lalaKey, isLalaMode, user]);
+
   // Check for existing user session on app load
   useEffect(() => {
     const checkExistingUser = async () => {
@@ -1112,16 +1125,6 @@ const App: React.FC = () => {
   }
 
   // Waiting page (user has already submitted answers)
-  const lalaKey = user ? `lala_${user.email}` : null;
-  const [lalaProfile, setLalaProfile] = useState<Record<string, any> | null>(null);
-
-  useEffect(() => {
-    if (lalaKey) {
-      const lalaData = localStorage.getItem(lalaKey);
-      if (lalaData) setLalaProfile(JSON.parse(lalaData));
-    }
-  }, [lalaKey, isLalaMode, user]);
-
   if (user?.answers && Object.keys(user.answers).length > 0) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-8 safe-area-top safe-area-bottom">
