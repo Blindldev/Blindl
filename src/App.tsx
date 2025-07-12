@@ -985,7 +985,6 @@ const App: React.FC = () => {
       delete newErrors[questionId];
       return newErrors;
     });
-    // No auto-advance logic here
   };
 
   const handleNext = async () => {
@@ -1722,12 +1721,7 @@ const App: React.FC = () => {
                       ? 'border-blue-500 bg-blue-50' 
                       : 'border-gray-200 hover:border-blue-300'
                   }`}
-                  onClick={() => {
-                    handleAnswer(question.id, option);
-                    setTimeout(() => {
-                      handleNext();
-                    }, 0);
-                  }}
+                  onClick={() => handleSingleSelect(question.id, option)}
                 >
                   <span className="font-medium">{option}</span>
                 </div>
