@@ -1729,6 +1729,7 @@ const App: React.FC = () => {
         );
       
       case 'select':
+        const isInvalid = !answer || !!validateField(question.id, answer);
         if (error && question.id === 'gender') {
           console.log('Gender answer when error shown:', answer);
         }
@@ -1749,7 +1750,7 @@ const App: React.FC = () => {
                 </div>
               ))}
             </div>
-            {error && (
+            {error && isInvalid && (
               <p className="text-red-500 text-sm mt-2">{error.message}</p>
             )}
           </div>
