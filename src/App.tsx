@@ -1780,27 +1780,28 @@ const App: React.FC = () => {
 
   // Add handleSingleSelect above renderQuestion
   const handleSingleSelect = (questionId: string, answer: any) => {
-    // Clear error for this field immediately
-    setErrors(prev => {
-      const newErrors = { ...prev };
-      delete newErrors[questionId];
-      return newErrors;
-    });
-    // Set the answer and immediately check if valid, then advance
-    setAnswers(prev => {
-      const newAnswers = { ...prev, [questionId]: answer };
-      const error = validateField(questionId, answer);
-      if (!error) {
-        // Use a microtask to ensure state is flushed before navigation
-        Promise.resolve().then(() => handleNext());
-      } else {
-        setErrors(prevErrors => ({
-          ...prevErrors,
-          [questionId]: { field: questionId, message: error }
-        }));
-      }
-      return newAnswers;
-    });
+    // Set the answer immediately
+    setAnswers(prev => ({ ...prev, [questionId]: answer }));
+
+    // Validate the clicked value directly
+    const error = validateField(questionId, answer);
+
+    if (!error) {
+      // Clear error immediately
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[questionId];
+        return newErrors;
+      });
+      // Advance to next question
+      Promise.resolve().then(() => handleNext());
+    } else {
+      // Set error if invalid
+      setErrors(prevErrors => ({
+        ...prevErrors,
+        [questionId]: { field: questionId, message: error }
+      }));
+    }
   };
 
   if (isEditingProfile) {
