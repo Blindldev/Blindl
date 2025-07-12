@@ -1775,6 +1775,18 @@ const App: React.FC = () => {
     }
   };
 
+  // Add handleSingleSelect above renderQuestion
+  const handleSingleSelect = (questionId: string, option: string) => {
+    handleAnswer(questionId, option);
+    // Auto-advance for single select questions
+    const question = questions.find(q => q.id === questionId);
+    if (question && question.type === 'select') {
+      setTimeout(() => {
+        handleNext();
+      }, 150);
+    }
+  };
+
   if (isEditingProfile) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-8 safe-area-top safe-area-bottom">
