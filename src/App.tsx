@@ -1776,15 +1776,29 @@ const App: React.FC = () => {
   };
 
   // Add handleSingleSelect above renderQuestion
-  const handleSingleSelect = (questionId: string, option: string) => {
-    handleAnswer(questionId, option);
-    // Auto-advance for single select questions
-    const question = questions.find(q => q.id === questionId);
-    if (question && question.type === 'select') {
-      setTimeout(() => {
-        handleNext();
-      }, 150);
-    }
+  const handleSingleSelect = (questionId: string, answer: any) => {
+    setAnswers(prev => {
+      const newAnswers = { ...prev, [questionId]: answer };
+      // Validate using the new state
+      const question = questions.find(q => q.id === questionId);
+      const error = validateField(questionId, answer);
+      if (!error) {
+        setTimeout(() => {
+          handleNext();
+        }, 0);
+      } else {
+        setErrors(prevErrors => ({
+          ...prevErrors,
+          [questionId]: { field: questionId, message: error }
+        }));
+      }
+      return newAnswers;
+    });
+    setErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors[questionId];
+      return newErrors;
+    });
   };
 
   if (isEditingProfile) {
