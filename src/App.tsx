@@ -1722,7 +1722,12 @@ const App: React.FC = () => {
                       ? 'border-blue-500 bg-blue-50' 
                       : 'border-gray-200 hover:border-blue-300'
                   }`}
-                  onClick={() => handleAnswer(question.id, option)}
+                  onClick={() => {
+                    handleAnswer(question.id, option);
+                    setTimeout(() => {
+                      handleNext();
+                    }, 0);
+                  }}
                 >
                   <span className="font-medium">{option}</span>
                 </div>
