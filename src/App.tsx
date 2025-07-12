@@ -1710,6 +1710,9 @@ const App: React.FC = () => {
         );
       
       case 'select':
+        if (error && question.id === 'gender') {
+          console.log('Gender answer when error shown:', answer);
+        }
         return (
           <div>
             <div className="space-y-3">
