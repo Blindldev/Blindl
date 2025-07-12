@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
@@ -438,6 +438,8 @@ const App: React.FC = () => {
   // Lala Mode profile state
   const lalaKey = user ? `lala_${user.email}` : null;
   const [lalaProfile, setLalaProfile] = useState<Record<string, any> | null>(null);
+  // Inside App component, after state declarations
+  const autoAdvancedRef = useRef(false);
 
   // Questions array
   const questions: any[] = [
