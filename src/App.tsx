@@ -1780,7 +1780,6 @@ const App: React.FC = () => {
     setAnswers(prev => {
       const newAnswers = { ...prev, [questionId]: answer };
       // Validate using the new state
-      const question = questions.find(q => q.id === questionId);
       const error = validateField(questionId, answer);
       if (!error) {
         setTimeout(() => {
