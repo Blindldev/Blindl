@@ -392,7 +392,26 @@ const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<UserProfile | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, any>>({});
+  const [answers, setAnswers] = useState<Record<string, any>>(() => {
+    // Try to load from localStorage if available
+    const token = localStorage.getItem('google_token');
+    let defaultAnswers: Record<string, any> = { gender: 'Male' };
+    if (token) {
+      try {
+        const decoded = JSON.parse(atob(token.split('.')[1]));
+        const existingData = localStorage.getItem(`user_${decoded.email}`);
+        if (existingData) {
+          const userData = JSON.parse(existingData);
+          if (userData.answers) {
+            return userData.answers;
+          }
+        }
+      } catch (e) {
+        // Ignore errors, fallback to default
+      }
+    }
+    return defaultAnswers;
+  });
   const [errors, setErrors] = useState<Record<string, ValidationError>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [phoneVerificationStep, setPhoneVerificationStep] = useState<'phone' | 'code' | 'complete'>('complete');
