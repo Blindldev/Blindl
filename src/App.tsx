@@ -1783,21 +1783,21 @@ const App: React.FC = () => {
       delete newErrors[questionId];
       return newErrors;
     });
-    // Set the answer
-    setAnswers(prev => ({ ...prev, [questionId]: answer }));
-
-    // Validate and navigate using the new value
-    const error = validateField(questionId, answer);
-    if (!error) {
-      setTimeout(() => {
-        handleNext();
-      }, 0);
-    } else {
-      setErrors(prevErrors => ({
-        ...prevErrors,
-        [questionId]: { field: questionId, message: error }
-      }));
-    }
+    // Set the answer and immediately check if valid, then advance
+    setAnswers(prev => {
+      const newAnswers = { ...prev, [questionId]: answer };
+      const error = validateField(questionId, answer);
+      if (!error) {
+        // Use a microtask to ensure state is flushed before navigation
+        Promise.resolve().then(() => handleNext());
+      } else {
+        setErrors(prevErrors => ({
+          ...prevErrors,
+          [questionId]: { field: questionId, message: error }
+        }));
+      }
+      return newAnswers;
+    });
   };
 
   if (isEditingProfile) {
