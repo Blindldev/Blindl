@@ -1777,27 +1777,27 @@ const App: React.FC = () => {
 
   // Add handleSingleSelect above renderQuestion
   const handleSingleSelect = (questionId: string, answer: any) => {
-    setAnswers(prev => {
-      const newAnswers = { ...prev, [questionId]: answer };
-      // Validate using the new state
-      const error = validateField(questionId, answer);
-      if (!error) {
-        setTimeout(() => {
-          handleNext();
-        }, 0);
-      } else {
-        setErrors(prevErrors => ({
-          ...prevErrors,
-          [questionId]: { field: questionId, message: error }
-        }));
-      }
-      return newAnswers;
-    });
+    // Clear error for this field immediately
     setErrors(prev => {
       const newErrors = { ...prev };
       delete newErrors[questionId];
       return newErrors;
     });
+    // Set the answer
+    setAnswers(prev => ({ ...prev, [questionId]: answer }));
+
+    // Validate and navigate using the new value
+    const error = validateField(questionId, answer);
+    if (!error) {
+      setTimeout(() => {
+        handleNext();
+      }, 0);
+    } else {
+      setErrors(prevErrors => ({
+        ...prevErrors,
+        [questionId]: { field: questionId, message: error }
+      }));
+    }
   };
 
   if (isEditingProfile) {
