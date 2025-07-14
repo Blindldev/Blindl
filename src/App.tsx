@@ -337,10 +337,23 @@ const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<UserProfile | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
+  // Helper to get default answers for all questions
+  const getDefaultAnswers = () => {
+    const defaults: Record<string, any> = {};
+    questions.forEach(q => {
+      if (q.type === 'select') {
+        defaults[q.id] = q.options?.[0] || '';
+      } else if (q.type === 'multiSelect') {
+        defaults[q.id] = q.options?.length ? [q.options[0]] : [];
+      }
+    });
+    return defaults;
+  };
+
   const [answers, setAnswers] = useState<Record<string, any>>(() => {
     // Try to load from localStorage if available
     const token = localStorage.getItem('google_token');
-    let defaultAnswers: Record<string, any> = { gender: 'Male' };
+    let defaultAnswers: Record<string, any> = getDefaultAnswers();
     if (token) {
       try {
         const decoded = JSON.parse(atob(token.split('.')[1]));
@@ -348,7 +361,7 @@ const App: React.FC = () => {
         if (existingData) {
           const userData = JSON.parse(existingData);
           if (userData.answers) {
-            return userData.answers;
+            return { ...defaultAnswers, ...userData.answers };
           }
         }
       } catch (e) {
@@ -1611,7 +1624,9 @@ const App: React.FC = () => {
           <button
             onClick={() => {
               setIsEditingProfile(true);
-              setAnswers(user.answers || {});
+              // Merge current answers with defaults for any missing fields
+              const defaults = getDefaultAnswers();
+              setAnswers({ ...defaults, ...(user.answers || {}) });
               setCurrentStep(0);
               setErrors({});
             }}
