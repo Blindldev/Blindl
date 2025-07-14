@@ -1696,9 +1696,6 @@ const App: React.FC = () => {
       
       case 'select':
         const isInvalid = !answer || !!validateField(question.id, answer);
-        if (error && question.id === 'gender') {
-          console.log('Gender answer when error shown:', answer);
-        }
         return (
           <div>
             <div className="space-y-3">
@@ -1719,6 +1716,7 @@ const App: React.FC = () => {
             {error && isInvalid && (
               <p className="text-red-500 text-sm mt-2">{error.message}</p>
             )}
+            {/* No Next button for single-select */}
           </div>
         );
       
