@@ -341,11 +341,12 @@ const App: React.FC = () => {
   const getDefaultAnswers = () => {
     const defaults: Record<string, any> = {};
     questions.forEach(q => {
-      if (q.type === 'select') {
-        defaults[q.id] = q.options?.[0] || '';
-      } else if (q.type === 'multiSelect') {
-        defaults[q.id] = q.options?.length ? [q.options[0]] : [];
+      if (q.type === 'select' && q.options && q.options.length > 0) {
+        defaults[q.id] = q.options[0];
+      } else if (q.type === 'multiSelect' && q.options && q.options.length > 0) {
+        defaults[q.id] = [q.options[0]];
       }
+      // Do not set a default if options are missing or empty
     });
     return defaults;
   };
