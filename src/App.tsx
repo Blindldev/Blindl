@@ -332,61 +332,6 @@ const RescheduleModal: React.FC<{
   );
 };
 
-function renderProfileEditInput(question: any, editingValue: any, setEditingValue: (v: any) => void) {
-  if (question.type === 'multiSelect') {
-    return (
-      <div className="space-y-2">
-        {question.options?.map((option: string) => (
-          <div
-            key={option}
-            className={`p-2 border rounded cursor-pointer ${Array.isArray(editingValue) && editingValue.includes(option) ? 'bg-blue-100 border-blue-400' : 'bg-white border-gray-200'}`}
-            onClick={() => {
-              let newVal = Array.isArray(editingValue) ? [...editingValue] : [];
-              if (newVal.includes(option)) newVal = newVal.filter((o: string) => o !== option);
-              else newVal.push(option);
-              setEditingValue(newVal);
-            }}
-          >
-            <span>{option}</span>
-            {Array.isArray(editingValue) && editingValue.includes(option) && <span className="ml-2 text-blue-600">✓</span>}
-          </div>
-        ))}
-      </div>
-    );
-  } else if (question.type === 'select') {
-    return (
-      <select
-        className="w-full border rounded p-2"
-        value={editingValue}
-        onChange={e => setEditingValue(e.target.value)}
-      >
-        <option value="">Select...</option>
-        {question.options?.map((option: string) => (
-          <option key={option} value={option}>{option}</option>
-        ))}
-      </select>
-    );
-  } else if (question.type === 'textarea') {
-    return (
-      <textarea
-        className="w-full border rounded p-2"
-        value={editingValue}
-        onChange={e => setEditingValue(e.target.value)}
-        rows={3}
-      />
-    );
-  } else {
-    return (
-      <input
-        className="w-full border rounded p-2"
-        type={question.type}
-        value={editingValue}
-        onChange={e => setEditingValue(e.target.value)}
-      />
-    );
-  }
-}
-
 const App: React.FC = () => {
   // All state and effect hooks at the very top
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -1549,7 +1494,23 @@ const App: React.FC = () => {
                     <div className="flex-1">
                       <h3 className="font-semibold text-gray-800 mb-2">{question.question}</h3>
                       {isEditing ? (
-                        renderProfileEditInput(question, editingValue, setEditingValue)
+                        <div className="space-y-2">
+                          {question.options?.map((option: string) => (
+                            <div
+                              key={option}
+                              className={`p-2 border rounded cursor-pointer ${Array.isArray(editingValue) && editingValue.includes(option) ? 'bg-blue-100 border-blue-400' : 'bg-white border-gray-200'}`}
+                              onClick={() => {
+                                let newVal = Array.isArray(editingValue) ? [...editingValue] : [];
+                                if (newVal.includes(option)) newVal = newVal.filter((o: string) => o !== option);
+                                else newVal.push(option);
+                                setEditingValue(newVal);
+                              }}
+                            >
+                              <span>{option}</span>
+                              {Array.isArray(editingValue) && editingValue.includes(option) && <span className="ml-2 text-blue-600">✓</span>}
+                            </div>
+                          ))}
+                        </div>
                       ) : (
                         <p className="text-gray-600">{Array.isArray(value) ? value.join(', ') : value}</p>
                       )}
@@ -1599,7 +1560,12 @@ const App: React.FC = () => {
                 <div key={key} className="border border-gray-200 rounded-xl p-4 my-4 w-full">
                   <h3 className="font-semibold text-gray-800 mb-2">{question.question}</h3>
                   {isEditing ? (
-                    renderProfileEditInput(question, editingValue, setEditingValue)
+                    <textarea
+                      value={editingValue}
+                      onChange={(e) => setEditingValue(e.target.value)}
+                      rows={3}
+                      className="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-colors"
+                    />
                   ) : (
                     <div className="w-full max-w-full bg-gray-50 border border-gray-100 rounded-lg p-3 text-sm text-gray-700 whitespace-pre-wrap break-words overflow-x-auto" style={{ fontFamily: 'inherit', minHeight: '3.5rem', maxHeight: '12rem' }}>
                       {value}
