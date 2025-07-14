@@ -1766,8 +1766,15 @@ const App: React.FC = () => {
 
   // Add handleSingleSelect above renderQuestion
   const handleSingleSelect = (questionId: string, answer: any) => {
-    // Set the answer immediately
-    setAnswers(prev => ({ ...prev, [questionId]: answer }));
+    // Always set the answer, even if it's the same as before, to force re-validation and navigation
+    setAnswers(prev => {
+      // If the answer is the same, still trigger validation and navigation
+      if (prev[questionId] === answer) {
+        // Force a re-render by updating state with a new object
+        return { ...prev };
+      }
+      return { ...prev, [questionId]: answer };
+    });
 
     // Validate the clicked value directly
     const error = validateField(questionId, answer);
