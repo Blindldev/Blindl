@@ -341,12 +341,11 @@ const App: React.FC = () => {
   const getDefaultAnswers = () => {
     const defaults: Record<string, any> = {};
     questions.forEach(q => {
-      if (q.type === 'select' && q.options && q.options.length > 0) {
-        defaults[q.id] = q.options[0];
-      } else if (q.type === 'multiSelect' && q.options && q.options.length > 0) {
-        defaults[q.id] = [q.options[0]];
+      if (q.type === 'select') {
+        defaults[q.id] = q.options?.[0] || '';
+      } else if (q.type === 'multiSelect') {
+        defaults[q.id] = q.options?.length ? [q.options[0]] : [];
       }
-      // Do not set a default if options are missing or empty
     });
     return defaults;
   };
@@ -1711,7 +1710,9 @@ const App: React.FC = () => {
         );
       
       case 'select':
-        const isInvalid = !answer || !!validateField(question.id, answer);
+        // Fallback: if answer is undefined, use first option
+        const selectAnswer = answer !== undefined ? answer : (question.options?.[0] || '');
+        const isInvalid = !selectAnswer || !!validateField(question.id, selectAnswer);
         return (
           <div>
             <div className="space-y-3">
@@ -1719,7 +1720,7 @@ const App: React.FC = () => {
                 <div
                   key={option}
                   className={`p-4 border-2 rounded-xl cursor-pointer transition-all ${
-                    answer === option 
+                    selectAnswer === option 
                       ? 'border-blue-500 bg-blue-50' 
                       : 'border-gray-200 hover:border-blue-300'
                   }`}
@@ -1737,7 +1738,8 @@ const App: React.FC = () => {
         );
       
       case 'multiSelect':
-        const selectedOptions = Array.isArray(answer) ? answer : [];
+        // Fallback: if answer is undefined, use [first option] or []
+        const multiSelectOptions = Array.isArray(answer) ? answer : (question.options?.length ? [question.options[0]] : []);
         return (
           <div>
             <div className="space-y-3">
@@ -1745,20 +1747,20 @@ const App: React.FC = () => {
                 <div
                   key={option}
                   className={`p-4 border-2 rounded-xl cursor-pointer transition-all ${
-                    selectedOptions.includes(option)
+                    multiSelectOptions.includes(option)
                       ? 'border-blue-500 bg-blue-50'
                       : 'border-gray-200 hover:border-blue-300'
                   }`}
                   onClick={() => {
-                    const newSelection = selectedOptions.includes(option)
-                      ? selectedOptions.filter(o => o !== option)
-                      : [...selectedOptions, option];
+                    const newSelection = multiSelectOptions.includes(option)
+                      ? multiSelectOptions.filter(o => o !== option)
+                      : [...multiSelectOptions, option];
                     handleAnswer(question.id, newSelection);
                   }}
                 >
                   <div className="flex items-center justify-between">
                     <span className="font-medium">{option}</span>
-                    {selectedOptions.includes(option) && (
+                    {multiSelectOptions.includes(option) && (
                       <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
                         <div className="w-2 h-2 bg-white rounded-full"></div>
                       </div>
